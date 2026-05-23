@@ -348,7 +348,10 @@ function releaseDrag(e) {
   } else if (kind==='clone'){
     ref.dragging=false;ref.el.style.cursor='grab';
     if (!moved){petEntity(ref);}
-    else{ref.vx=vx;ref.vy=vy;}
+    else{
+      ref.vx=vx;ref.vy=vy;
+      if (spd>320&&clones.length<5&&Math.random()<0.55) spawnClone();
+    }
   } else if (kind==='item'){
     ref.vx=vx;ref.vy=vy;
     checkClean(ref);
@@ -610,15 +613,9 @@ function physStep(dt){
     const c=clones[i];
     if (c.dead) continue;
     if (!c.dragging){
-      if (!isDead){
-        const tx=phys.x+Math.cos(i*2.3+c.age*.5)*30;
-        c.vx+=(tx-c.x)*3*dt;c.vy+=(phys.y-c.y)*1.5*dt+GRAV*dt;
-      } else {
-        c.vy+=GRAV*dt;
-        // Wander independently when main is gone
-        if (c.y>=gY-2&&Math.abs(c.vy)<5&&Math.abs(c.vx)<15&&Math.floor(c.age)>Math.floor(c.age-dt)&&Math.random()<0.5)
-          c.vx=(Math.random()-.5)*110;
-      }
+      c.vy+=GRAV*dt;
+      if (c.y>=gY-2&&Math.abs(c.vy)<5&&Math.abs(c.vx)<15&&Math.floor(c.age)>Math.floor(c.age-dt)&&Math.random()<0.5)
+        c.vx=(Math.random()-.5)*110;
       c.vx*=Math.pow(0.995,dt*60);
       c.x+=c.vx*dt;c.y+=c.vy*dt;
       if (c.y>=gY){c.y=gY;const bnc=Math.abs(c.vy);c.vy*=-BNCE;if(bnc>=15)c.vx*=GFRIC;if(Math.abs(c.vy)<15)c.vy=0;}
