@@ -253,7 +253,7 @@ const E={LONE:0,TRUST:1,HAPPY:2,CURIO:3,ATTACH:4,FEAR:5};
 let emo=[30,40,65,60,20,10];
 let hunger=80,energy=85,health=100;
 let day=1,gameHour=8,gameMin=0,totalMins=0;
-let isSleeping=false,isDead=false,stage=0;
+let isSleeping=false,isDead=false,allDead=false,deathCause='',stage=0;
 let minutesSinceInteract=0,actionLocked=false;
 let entityDirty=0;
 let wanderTimer=0;
@@ -290,7 +290,8 @@ const ITEM_DEFS={
 let activeDrag=null;
 
 function beginDrag(e, kind, ref=null) {
-  if (kind!=='item'&&isDead) return;
+  if (allDead) return;
+  if (kind==='main'&&isDead) return;
   e.preventDefault(); e.stopPropagation();
   const r=scn().getBoundingClientRect();
   const cx=e.clientX-r.left, cy=e.clientY-r.top;
@@ -341,7 +342,7 @@ function releaseDrag(e) {
     else{
       phys.vx=vx;phys.vy=vy;
       emo[E.HAPPY]=Math.min(100,emo[E.HAPPY]+3);clampEmo();
-      if (spd>320&&clones.length<5&&Math.random()<0.55) spawnClone();
+      if (spd>320&&clones.length<5&&!isDead&&Math.random()<0.55) spawnClone();
       checkTreeHit(spd);
     }
   } else if (kind==='clone'){
@@ -364,7 +365,7 @@ window.addEventListener('pointercancel', ()=>{
 });
 
 function petEntity(ent) {
-  if (isDead) return;
+  if (allDead) return;
   minutesSinceInteract=0;
   emo[E.HAPPY] =Math.min(100,emo[E.HAPPY]+8);
   emo[E.TRUST] =Math.min(100,emo[E.TRUST]+2);
@@ -442,34 +443,28 @@ function spawnBlood(cx,cy) {
 function killEntity(isClone,cr,x,y) {
   spawnBlood(x+28,y+28);
   if (!isClone) {
-    isDead=true;
+    isDead=true; deathCause='被大石头压扁';
     const wrap=document.getElementById('clawd-wrap');
     wrap.style.transition='transform 0.12s';
     wrap.style.transform='scaleY(0.1) scaleX(2.2)';
-    // Soul rises from the squashed body
     setTimeout(()=>spawnSoul(x, y-20), 150);
     setTimeout(()=>{
       wrap.style.display='none';
-      document.getElementById('death-msg').textContent=`被大石头压扁了（第 ${day} 天）`;
-      document.getElementById('death').style.display='flex';
       setLog('💀 Claw\'d 被压成了肉饼...');
+      checkAllDead();
     },500);
   } else {
     cr.dead=true;
     const el=cr.el;
     el.style.transition='transform 0.12s';
     el.style.transform='scaleY(0.1) scaleX(2.2)';
-    setTimeout(()=>{
-      el.remove();
-      const idx=clones.indexOf(cr);
-      if (idx!==-1) clones.splice(idx,1);
-    },180);
-    // Survivors panic
+    setTimeout(()=>{el.remove();const idx=clones.indexOf(cr);if(idx!==-1)clones.splice(idx,1);},180);
     emo[E.FEAR]=Math.min(100,emo[E.FEAR]+30);
     emo[E.HAPPY]=Math.max(0,emo[E.HAPPY]-15);
     clampEmo();
     showBubble('😱');
-    setLog('一只克隆体被压扁了！其他人陷入恐慌！');
+    setLog('一只克隆体被压扁了！');
+    checkAllDead();
   }
 }
 
@@ -544,7 +539,7 @@ function spawnClone(){
   const cCtx=cnv.getContext('2d');cCtx.imageSmoothingEnabled=false;
   el.appendChild(cnv);s.appendChild(el);
   const c={el,ctx:cCtx,x:phys.x+(Math.random()-.5)*40,y:phys.y,vx:(Math.random()-.5)*120,vy:-100-Math.random()*80,
-    af:0,at:0,flipX:false,dirty:entityDirty*0.7,dragging:false,dead:false};
+    af:0,at:0,age:0,flipX:false,dirty:entityDirty*0.7,dragging:false,dead:false};
   el.addEventListener('pointerdown',e=>beginDrag(e,'clone',c));
   clones.push(c);
   spawnParticle('✨');
@@ -581,41 +576,49 @@ function updateTrail(spd){
 
 // ── PHYSICS STEP ──
 function physStep(dt){
-  if (isDead) return;
+  if (allDead) return;
   const gY=gndY(),sW=scnW(),s=scn();
 
   // ── MAIN ──
-  // Safety snap only when scene has real dimensions (avoids false triggers during init)
-  const sh=scnH();
-  if (sh>50&&(phys.x<-30||phys.x>sW+30||phys.y<-30||phys.y>sh+30)){
-    phys.x=Math.max(0,Math.min(sW-ESIZ,phys.x));
-    phys.y=Math.max(0,Math.min(gY,phys.y));
-    phys.vx=0;phys.vy=0;
-  }
-  if (!(activeDrag&&activeDrag.kind==='main')){
-    phys.vy+=GRAV*dt;phys.x+=phys.vx*dt;phys.y+=phys.vy*dt;
-    phys.vx*=Math.pow(AFRIC,dt*60);
-    if (phys.y>=gY){phys.y=gY;const bnc=Math.abs(phys.vy);phys.vy*=-BNCE;if(bnc>=15)phys.vx*=GFRIC;if(Math.abs(phys.vy)<15)phys.vy=0;}
-    if (phys.x<0){phys.x=0;phys.vx=Math.abs(phys.vx)*0.4;}
-    if (phys.x>sW-ESIZ){phys.x=sW-ESIZ;phys.vx=-Math.abs(phys.vx)*0.4;}
-    if (!isSleeping&&phys.y>=gY-2&&Math.abs(phys.vy)<5&&Math.abs(phys.vx)<15){
-      wanderTimer-=dt;
-      if (wanderTimer<=0){wanderTimer=3+Math.random()*5;phys.vx=(Math.random()-.5)*110;}
+  if (!isDead){
+    const sh=scnH();
+    if (sh>50&&(phys.x<-30||phys.x>sW+30||phys.y<-30||phys.y>sh+30)){
+      phys.x=Math.max(0,Math.min(sW-ESIZ,phys.x));
+      phys.y=Math.max(0,Math.min(gY,phys.y));
+      phys.vx=0;phys.vy=0;
     }
-    if (Math.abs(phys.vx)>15) flipX=phys.vx<0;
+    if (!(activeDrag&&activeDrag.kind==='main')){
+      phys.vy+=GRAV*dt;phys.x+=phys.vx*dt;phys.y+=phys.vy*dt;
+      phys.vx*=Math.pow(AFRIC,dt*60);
+      if (phys.y>=gY){phys.y=gY;const bnc=Math.abs(phys.vy);phys.vy*=-BNCE;if(bnc>=15)phys.vx*=GFRIC;if(Math.abs(phys.vy)<15)phys.vy=0;}
+      if (phys.x<0){phys.x=0;phys.vx=Math.abs(phys.vx)*0.4;}
+      if (phys.x>sW-ESIZ){phys.x=sW-ESIZ;phys.vx=-Math.abs(phys.vx)*0.4;}
+      if (!isSleeping&&phys.y>=gY-2&&Math.abs(phys.vy)<5&&Math.abs(phys.vx)<15){
+        wanderTimer-=dt;
+        if (wanderTimer<=0){wanderTimer=3+Math.random()*5;phys.vx=(Math.random()-.5)*110;}
+      }
+      if (Math.abs(phys.vx)>15) flipX=phys.vx<0;
+    }
+    const spd=Math.hypot(phys.vx,phys.vy);
+    document.getElementById('clawd-wrap').style.left=Math.round(phys.x)+'px';
+    document.getElementById('clawd-wrap').style.top=Math.round(phys.y)+'px';
+    updateTrail(spd);
   }
-  const spd=Math.hypot(phys.vx,phys.vy);
-  document.getElementById('clawd-wrap').style.left=Math.round(phys.x)+'px';
-  document.getElementById('clawd-wrap').style.top=Math.round(phys.y)+'px';
-  updateTrail(spd);
 
   // ── CLONES ──
   for (let i=clones.length-1;i>=0;i--){
     const c=clones[i];
     if (c.dead) continue;
     if (!c.dragging){
-      const tx=phys.x+Math.cos(i*2.3+c.age*.5)*30;
-      c.vx+=(tx-c.x)*3*dt;c.vy+=(phys.y-c.y)*1.5*dt+GRAV*dt;
+      if (!isDead){
+        const tx=phys.x+Math.cos(i*2.3+c.age*.5)*30;
+        c.vx+=(tx-c.x)*3*dt;c.vy+=(phys.y-c.y)*1.5*dt+GRAV*dt;
+      } else {
+        c.vy+=GRAV*dt;
+        // Wander independently when main is gone
+        if (c.y>=gY-2&&Math.abs(c.vy)<5&&Math.abs(c.vx)<15&&Math.floor(c.age)>Math.floor(c.age-dt)&&Math.random()<0.5)
+          c.vx=(Math.random()-.5)*110;
+      }
       c.vx*=Math.pow(0.995,dt*60);
       c.x+=c.vx*dt;c.y+=c.vy*dt;
       if (c.y>=gY){c.y=gY;const bnc=Math.abs(c.vy);c.vy*=-BNCE;if(bnc>=15)c.vx*=GFRIC;if(Math.abs(c.vy)<15)c.vy=0;}
@@ -623,7 +626,7 @@ function physStep(dt){
       if (Math.abs(c.vx)>15) c.flipX=c.vx<0;
     }
     c.el.style.left=Math.round(c.x)+'px';c.el.style.top=Math.round(c.y)+'px';
-    c.at+=dt;if(c.at>1/1.5){c.at=0;c.af=(c.af+1)%4;}
+    c.age+=dt;c.at+=dt;if(c.at>1/1.5){c.at=0;c.af=(c.af+1)%4;}
     drawEntityFrame(c.ctx,isSleeping?'sleep':'idle',c.af,c.flipX,c.dirty);
   }
 
@@ -679,7 +682,7 @@ function loop(ts){
 }
 
 function gameTick(){
-  if (isDead) return;
+  if (allDead) return;
   totalMins++;minutesSinceInteract++;
   advanceTime();
   if (isSleeping){energy=Math.min(100,energy+0.8);hunger=Math.max(0,hunger-0.07);if(energy>=100)autoWake();}
@@ -723,19 +726,28 @@ function checkCritical(){
   if (hunger<10||health<20) emo[E.FEAR]=Math.min(100,emo[E.FEAR]+0.3);
 }
 function die(cause){
-  isDead=true;setAnim('sad');
+  if (isDead) return;
+  isDead=true; deathCause=cause; setAnim('sad');
   setLog(`💀 Claw'd 即将离开...（${cause}）`);
   setTimeout(()=>spawnSoul(phys.x, phys.y), 300);
   setTimeout(()=>{
-    document.getElementById('death-msg').textContent=`它活了 ${day} 天`;
-    document.getElementById('death').style.display='flex';
-    setLog(`💀 Claw'd 离开了...（${cause}）`);
+    document.getElementById('clawd-wrap').style.display='none';
+    checkAllDead();
   },1800);
+}
+function checkAllDead(){
+  if (!isDead||allDead) return;
+  if (clones.some(c=>!c.dead)) return;
+  allDead=true;
+  const msg=clones.length>0?`它和 ${clones.length} 只克隆一起活了 ${day} 天`:`它活了 ${day} 天`;
+  document.getElementById('death-msg').textContent=msg;
+  document.getElementById('death').style.display='flex';
+  setLog(`💀 全员离开了...（${deathCause}）`);
 }
 
 // ── ACTIONS ──
 function doAction(type){
-  if (isDead||actionLocked) return;
+  if (isDead||allDead||actionLocked) return;
   minutesSinceInteract=0;emo[E.LONE]=Math.max(0,emo[E.LONE]-18);
   if (type==='sleep'){
     if (isSleeping){autoWake();return;}
@@ -898,7 +910,7 @@ function appendChat(role,text){
 function restartGame(){
   [hunger,energy,health,day,gameHour,gameMin,totalMins]=[80,85,100,1,8,0,0];
   emo=[30,40,65,60,20,10];entityDirty=0;
-  isSleeping=false;isDead=false;stage=0;minutesSinceInteract=0;chatHistory=[];
+  isSleeping=false;isDead=false;allDead=false;deathCause='';stage=0;minutesSinceInteract=0;chatHistory=[];
   phys.x=scnW()/2-32;phys.y=gndY();phys.vx=0;phys.vy=0;
   clones.forEach(c=>c.el.remove());clones.length=0;
   apples.forEach(a=>a.el.remove());apples.length=0;
