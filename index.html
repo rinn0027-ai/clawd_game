@@ -303,7 +303,9 @@ window.addEventListener('pointermove', e=>{
   const r=scn().getBoundingClientRect();
   const cx=e.clientX-r.left, cy=e.clientY-r.top;
   if (Math.abs(cx-activeDrag.prevX)+Math.abs(cy-activeDrag.prevY)>5) activeDrag.moved=true;
-  const nx=cx-activeDrag.offX, ny=cy-activeDrag.offY;
+  // Clamp to scene bounds so entity never goes off-screen
+  const nx=Math.max(-8, Math.min(scnW()-ESIZ+8, cx-activeDrag.offX));
+  const ny=Math.max(-8, Math.min(scnH()-ESIZ+8, cy-activeDrag.offY));
   if (activeDrag.kind==='main'){phys.x=nx;phys.y=ny;}
   else{activeDrag.ref.x=nx;activeDrag.ref.y=ny;}
   if (activeDrag.kind==='item'){
@@ -314,7 +316,7 @@ window.addEventListener('pointermove', e=>{
   activeDrag.prevX=cx;activeDrag.prevY=cy;activeDrag.prevT=e.timeStamp;
 },{passive:false});
 
-window.addEventListener('pointerup', e=>{
+function releaseDrag(e) {
   if (!activeDrag) return;
   const r=scn().getBoundingClientRect();
   const cx=e.clientX-r.left, cy=e.clientY-r.top;
@@ -342,6 +344,15 @@ window.addEventListener('pointerup', e=>{
     ref.vx=vx;ref.vy=vy;
     checkClean(ref);
   }
+}
+window.addEventListener('pointerup', releaseDrag);
+// iOS Safari fires pointercancel instead of pointerup when OS gesture intercepts
+window.addEventListener('pointercancel', ()=>{
+  if (!activeDrag) return;
+  const {kind,ref}=activeDrag;
+  activeDrag=null;
+  if (kind==='main') document.getElementById('clawd-wrap').style.cursor='grab';
+  else if (kind==='clone'){ref.dragging=false;ref.el.style.cursor='grab';}
 });
 
 function petEntity(ent) {
@@ -551,6 +562,12 @@ function physStep(dt){
   const gY=gndY(),sW=scnW(),s=scn();
 
   // ── MAIN ──
+  // Safety: if character escaped bounds (stale drag, etc.), snap back
+  if (phys.x<-30||phys.x>scnW()+30||phys.y<-30||phys.y>scnH()+30){
+    phys.x=Math.max(0,Math.min(scnW()-ESIZ,phys.x));
+    phys.y=Math.max(0,Math.min(gY,phys.y));
+    phys.vx=0;phys.vy=0;
+  }
   if (!(activeDrag&&activeDrag.kind==='main')){
     phys.vy+=GRAV*dt;phys.x+=phys.vx*dt;phys.y+=phys.vy*dt;
     phys.vx*=Math.pow(AFRIC,dt*60);
