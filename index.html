@@ -189,11 +189,14 @@ html,body{width:100%;height:100%;background:var(--bg);display:flex;align-items:c
 .msg{font-size:7px;line-height:1.8;max-width:90%;padding:5px 8px;border:1px solid}
 .msg.player{align-self:flex-end;color:#aadcff;border-color:#1a3050;background:#0a1828}
 .msg.clawd{align-self:flex-start;color:var(--accent);border-color:#2a1e00;background:#1a1200}
-#api-row{padding:6px 8px;border-top:1px solid var(--border);display:flex;gap:4px;flex-shrink:0}
+#api-row{padding:6px 8px;border-top:1px solid var(--border);display:flex;gap:4px;flex-shrink:0;align-items:center}
+#provider-btn{background:#1a1a2e;border:1px solid var(--accent);color:var(--accent);
+  font-family:'Press Start 2P',monospace;font-size:5px;padding:5px 5px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+#provider-btn.gemini{border-color:#4a8fff;color:#4a8fff}
 #api-input{flex:1;background:#0d0d1e;border:1px solid var(--border2);color:var(--dim);
-  font-family:'Press Start 2P',monospace;font-size:6px;padding:5px 6px}
+  font-family:'Press Start 2P',monospace;font-size:6px;padding:5px 6px;min-width:0}
 #api-save{background:#1a1a2e;border:1px solid var(--border2);color:var(--text);
-  font-family:'Press Start 2P',monospace;font-size:6px;padding:5px 7px;cursor:pointer;white-space:nowrap}
+  font-family:'Press Start 2P',monospace;font-size:6px;padding:5px 7px;cursor:pointer;white-space:nowrap;flex-shrink:0}
 #input-row{padding:6px 8px 8px;border-top:1px solid var(--border);display:flex;gap:4px;flex-shrink:0}
 #chat-input{flex:1;background:#0d0d1e;border:1px solid var(--border2);color:var(--text);
   font-family:'Press Start 2P',monospace;font-size:7px;padding:6px 8px}
@@ -271,7 +274,8 @@ html,body{width:100%;height:100%;background:var(--bg);display:flex;align-items:c
     </div>
     <div id="chat-log"></div>
     <div id="api-row">
-      <input id="api-input" type="password" placeholder="Anthropic API Key（可选）">
+      <button id="provider-btn" onclick="toggleProvider()" title="切换 API 提供商">Anthropic</button>
+      <input id="api-input" type="password" placeholder="Anthropic API Key">
       <button id="api-save" onclick="saveKey()">保存</button>
     </div>
     <div id="input-row">
@@ -372,6 +376,8 @@ let wanderX = 50; // % position
 let wanderDir = 0;
 let wanderTimer = 0;
 let apiKey = localStorage.getItem('clawd_apikey') || '';
+let geminiKey = localStorage.getItem('clawd_geminikey') || '';
+let apiProvider = localStorage.getItem('clawd_provider') || 'anthropic';
 let chatHistory = [];
 
 const STAGE_NAMES = ['蛋','婴儿','幼儿','少年','成年','老年'];
@@ -725,13 +731,38 @@ function toggleChat() {
   }
 }
 
+function toggleProvider() {
+  apiProvider = apiProvider === 'anthropic' ? 'gemini' : 'anthropic';
+  localStorage.setItem('clawd_provider', apiProvider);
+  updateProviderUI();
+}
+
+function updateProviderUI() {
+  const btn = document.getElementById('provider-btn');
+  const inp = document.getElementById('api-input');
+  if (apiProvider === 'gemini') {
+    btn.textContent = 'Gemini';
+    btn.classList.add('gemini');
+    inp.placeholder = geminiKey ? 'Gemini Key 已保存 ✓' : 'Google Gemini API Key';
+  } else {
+    btn.textContent = 'Anthropic';
+    btn.classList.remove('gemini');
+    inp.placeholder = apiKey ? 'API Key 已保存 ✓' : 'Anthropic API Key';
+  }
+}
+
 function saveKey() {
   const k = document.getElementById('api-input').value.trim();
   if (!k) return;
-  apiKey = k;
-  localStorage.setItem('clawd_apikey', k);
+  if (apiProvider === 'gemini') {
+    geminiKey = k;
+    localStorage.setItem('clawd_geminikey', k);
+  } else {
+    apiKey = k;
+    localStorage.setItem('clawd_apikey', k);
+  }
   document.getElementById('api-input').value = '';
-  document.getElementById('api-input').placeholder = 'API Key 已保存 ✓';
+  updateProviderUI();
 }
 
 document.getElementById('chat-input').addEventListener('keydown', e => {
@@ -750,8 +781,9 @@ async function sendChat() {
   emo[E.TRUST] = Math.min(100, emo[E.TRUST]+0.5);
   emo[E.ATTACH]= Math.min(100, emo[E.ATTACH]+0.3);
 
-  if (!apiKey) {
-    appendChat('clawd', '（你还没有给我配置 API Key，我没办法回话...）');
+  const activeKey = apiProvider === 'gemini' ? geminiKey : apiKey;
+  if (!activeKey) {
+    appendChat('clawd', `（你还没有配置 ${apiProvider === 'gemini' ? 'Gemini' : 'Anthropic'} API Key，我没办法回话...）`);
     return;
   }
 
@@ -761,23 +793,45 @@ async function sendChat() {
 
   appendChat('clawd', '...');
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type':'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version':'2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        system: systemPrompt,
-        messages: chatHistory,
-      })
-    });
-    const data = await resp.json();
-    const reply = data?.content?.[0]?.text?.trim() || '（沉默）';
-    // Replace the "..." message
+    let reply;
+    if (apiProvider === 'gemini') {
+      const geminiHistory = chatHistory.map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{text: m.content}]
+      }));
+      const resp = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${activeKey}`,
+        {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            system_instruction: {parts:[{text: systemPrompt}]},
+            contents: geminiHistory,
+            generationConfig: {maxOutputTokens: 300},
+          })
+        }
+      );
+      const data = await resp.json();
+      reply = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '（沉默）';
+    } else {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type':'application/json',
+          'x-api-key': activeKey,
+          'anthropic-version':'2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 300,
+          system: systemPrompt,
+          messages: chatHistory,
+        })
+      });
+      const data = await resp.json();
+      reply = data?.content?.[0]?.text?.trim() || '（沉默）';
+    }
     const msgs = document.getElementById('chat-log').querySelectorAll('.msg.clawd');
     msgs[msgs.length-1].textContent = reply;
     chatHistory.push({role:'assistant', content:reply});
@@ -857,6 +911,7 @@ setInterval(updateUI, 500);
 buildScene();
 loadGame();
 updateUI();
+updateProviderUI();
 drawFrame();
 requestAnimationFrame(loop);
 </script>
