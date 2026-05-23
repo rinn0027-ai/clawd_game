@@ -263,7 +263,7 @@ let geminiProxy=localStorage.getItem('clawd_geminiproxy')||'';
 let apiProvider=localStorage.getItem('clawd_provider')||'anthropic';
 let chatHistory=[];
 const STAGE_NAMES=['蛋','婴儿','幼儿','少年','成年','老年'];
-const STAGE_DAYS=[0,1,5,15,30,60];
+const STAGE_DAYS=[0,1,2,4,6,8];
 const DRIFT=[.40,-.02,-.20,-.15,-.005,-.30];
 
 // ── PHYSICS ──
@@ -342,7 +342,7 @@ function releaseDrag(e) {
     else{
       phys.vx=vx;phys.vy=vy;
       emo[E.HAPPY]=Math.min(100,emo[E.HAPPY]+3);clampEmo();
-      if (spd>320&&clones.length<5&&!isDead&&Math.random()<0.55) spawnClone();
+      if (spd>320&&clones.length<5&&!isDead&&Math.random()<0.55) spawnIndividual();
       checkTreeHit(spd);
     }
   } else if (kind==='clone'){
@@ -351,7 +351,7 @@ function releaseDrag(e) {
     else{
       ref.vx=vx;ref.vy=vy;
       emo[E.HAPPY]=Math.min(100,emo[E.HAPPY]+3);clampEmo();
-      if (spd>320&&clones.length<5&&Math.random()<0.55) spawnClone();
+      if (spd>320&&clones.length<5&&Math.random()<0.55) spawnIndividual();
       checkTreeHit(spd,ref.x,ref.y);
     }
   } else if (kind==='item'){
@@ -383,7 +383,7 @@ function petEntity(ent) {
     setCloneAnim(ent,'happy',900);
     showEntityBubble(ent,emoji);
     spawnParticle('💗',ent.x,ent.y);
-    setLog('克隆体蹭了蹭你的手...');
+    setLog('个体蹭了蹭你的手...');
   } else {
     if (!isSleeping&&!actionLocked){setAnim('happy');lockAction(800);setTimeout(()=>{if(!isSleeping)setAnim('idle');},800);}
     showBubble(emoji);
@@ -434,7 +434,7 @@ function checkClean(item) {
   });
 }
 
-function spawnSoul(x, y) {
+function spawnSoul(x, y, fX=flipX) {
   const el = document.createElement('canvas');
   el.width = 16; el.height = 16;
   el.className = 'soul';
@@ -442,7 +442,7 @@ function spawnSoul(x, y) {
   el.style.top = y + 'px';
   const sc = el.getContext('2d');
   sc.imageSmoothingEnabled = false;
-  drawEntityFrame(sc, 'idle', 0, flipX, 0);
+  drawEntityFrame(sc, 'idle', 0, fX, 0);
   scn().appendChild(el);
   el.addEventListener('animationend', () => el.remove());
 }
@@ -483,7 +483,7 @@ function killEntity(isClone,cr,x,y) {
     emo[E.HAPPY]=Math.max(0,emo[E.HAPPY]-15);
     clampEmo();
     showBubble('😱');
-    setLog('一只克隆体被压扁了！');
+    setLog('一个个体被压扁了！');
     checkAllDead();
   }
 }
@@ -549,7 +549,7 @@ function spawnApple(x,y){
 }
 
 // ── CLONES ──
-function spawnClone(){
+function spawnIndividual(){
   const s=scn();
   const el=document.createElement('div');
   el.style.cssText='position:absolute;cursor:grab;touch-action:none;user-select:none;';
@@ -564,7 +564,7 @@ function spawnClone(){
   el.addEventListener('pointerdown',e=>beginDrag(e,'clone',c));
   clones.push(c);
   spawnParticle('✨');
-  setLog('一只小克隆出现了！拖拽它一起玩吧～');
+  setLog('✨ 一个新个体诞生了！');
 }
 
 // ── TRAIL ──
@@ -642,6 +642,17 @@ function physStep(dt){
     }
     c.el.style.left=Math.round(c.x)+'px';c.el.style.top=Math.round(c.y)+'px';
     c.age+=dt;
+    // Natural old-age death for individuals
+    if (c.age>=600&&!c.dead){
+      c.dead=true;
+      setCloneAnim(c,'sad',500);
+      setTimeout(()=>{spawnSoul(c.x,c.y,c.flipX);},300);
+      setTimeout(()=>{
+        c.el.remove();const idx=clones.indexOf(c);if(idx!==-1)clones.splice(idx,1);
+        setTimeout(()=>{if(clones.length<5)spawnIndividual();},500);
+        setLog('💫 一个个体寿终正寝，新的生命即将诞生...');
+      },1800);
+    }
     if (!c.animLock) c.anim=currentAnim==='eat'?'idle':currentAnim;
     const cDef=ANIM_DEFS[c.anim];
     c.at+=dt;if(c.at>=1/cDef.fps){c.at=0;c.af=(c.af+1)%cDef.frames;}
@@ -691,7 +702,7 @@ function physStep(dt){
           emo[E.HAPPY]=Math.min(100,emo[E.HAPPY]+10);emo[E.TRUST]=Math.min(100,emo[E.TRUST]+1);clampEmo();
           setCloneAnim(cl,'eat',1600);
           showEntityBubble(cl,'😋🍎');spawnParticle('🍎',cl.x,cl.y);
-          setLog('克隆体捡到苹果吃掉了！');break;
+          setLog('个体捡到苹果吃掉了！');break;
         }
       }
     }
@@ -728,8 +739,8 @@ function gameTick(){
 }
 
 function advanceTime(){
-  gameMin++;if(gameMin>=60){gameMin=0;gameHour=(gameHour+1)%24;}
-  if(gameHour===0&&gameMin===0)day++;
+  gameMin++;
+  if(gameMin>=60){gameMin=0;gameHour=(gameHour+1)%24;day++;} // 1 day = 1 real minute
 }
 function tickEmotions(){
   for (let i=0;i<6;i++) emo[i]+=DRIFT[i];
@@ -753,24 +764,43 @@ function tickEmotions(){
 }
 function checkStage(){for(let i=STAGE_DAYS.length-1;i>=0;i--){if(day>=STAGE_DAYS[i]){stage=i;break;}}}
 function checkCritical(){
-  if (health<=0){die('starved');return;}
+  if (day>=10&&!isDead){die('寿终正寝');return;}
+  if (health<=0){die('饥饿');return;}
   if (hunger<10||health<20) emo[E.FEAR]=Math.min(100,emo[E.FEAR]+0.3);
 }
+let rebirthTO=null;
 function die(cause){
   if (isDead) return;
   isDead=true; deathCause=cause; setAnim('sad');
-  setLog(`💀 Claw'd 即将离开...（${cause}）`);
-  setTimeout(()=>spawnSoul(phys.x, phys.y), 300);
+  const natural=cause==='寿终正寝';
+  setLog(natural?'💫 寿终正寝，新的生命即将诞生...':(`💀 Claw'd 即将离开...（${cause}）`));
+  setTimeout(()=>spawnSoul(phys.x,phys.y),300);
   setTimeout(()=>{
     document.getElementById('clawd-wrap').style.display='none';
-    checkAllDead();
+    if (natural){rebirthTO=setTimeout(rebirthMain,1000);}
+    else{checkAllDead();}
   },1800);
+}
+function rebirthMain(){
+  rebirthTO=null;
+  isDead=false;allDead=false;
+  hunger=80;energy=85;health=100;
+  day=0;gameHour=8;gameMin=0;minutesSinceInteract=0;
+  emo=[30,40,65,60,20,10];entityDirty=0;clampEmo();
+  phys.x=scnW()/2-32+(Math.random()-.5)*80;phys.y=0;
+  phys.vx=(Math.random()-.5)*80;phys.vy=-150;
+  const wrap=document.getElementById('clawd-wrap');
+  wrap.style.display='';wrap.style.transform='';wrap.style.transition='';
+  document.getElementById('death').style.display='none';
+  setAnim('idle');setLog('✨ 新的生命诞生了！');
+  spawnParticle('✨');spawnParticle('🌟');
 }
 function checkAllDead(){
   if (!isDead||allDead) return;
   if (clones.some(c=>!c.dead)) return;
+  clearTimeout(rebirthTO);rebirthTO=null;
   allDead=true;
-  const msg=clones.length>0?`它和 ${clones.length} 只克隆一起活了 ${day} 天`:`它活了 ${day} 天`;
+  const msg=clones.length>0?`群体存活了 ${day} 轮（${1+clones.length} 个个体）`:`它活了 ${day} 轮`;
   document.getElementById('death-msg').textContent=msg;
   document.getElementById('death').style.display='flex';
   setLog(`💀 全员离开了...（${deathCause}）`);
@@ -805,7 +835,7 @@ function doAction(type){
     showBubble('🎉');spawnParticle('⭐');spawnParticle('💫');
     setLog('Claw\'d 玩得超开心！');
     entityDirty=Math.min(80,entityDirty+5);
-    if (emo[E.HAPPY]>85&&clones.length<5&&Math.random()<0.3) spawnClone();
+    if (emo[E.HAPPY]>85&&clones.length<5&&Math.random()<0.3) spawnIndividual();
   }
   clampEmo();updateUI();
 }
@@ -931,7 +961,7 @@ async function sendChat(){
 function buildSystemPrompt(){
   const phase=['深夜','黎明','上午','下午','傍晚','深夜'][gameHour<4?0:gameHour<8?1:gameHour<12?2:gameHour<17?3:gameHour<21?4:5];
   const[lone,trust,happy,curio,attach,fear]=emo.map(v=>Math.round(v));
-  return `你是 Claw'd，一只橘色像素小生物。不要提 AI。用简短有个性的中文回复（1-3句），可用颜文字。${clones.length>0?`\n当前有 ${clones.length} 只克隆体`:''} ${entityDirty>40?'\n身上有点脏':''}
+  return `你是 Claw'd，一只橘色像素小生物。不要提 AI。用简短有个性的中文回复（1-3句），可用颜文字。${clones.length>0?`\n当前有 ${clones.length} 个其他个体`:''} ${entityDirty>40?'\n身上有点脏':''}
 性格：【${getPersonality()}】状态：${isSleeping?'睡觉中':'清醒'} 第${day}天 ${String(gameHour).padStart(2,'0')}:${String(gameMin).padStart(2,'0')} ${phase}
 阶段：${STAGE_NAMES[stage]} 饥饿:${Math.round(hunger)} 精力:${Math.round(energy)}
 情绪— 孤独:${lone} 信任:${trust} 快乐:${happy} 好奇:${curio} 依恋:${attach} 恐惧:${fear}
@@ -947,6 +977,7 @@ function appendChat(role,text){
 function restartGame(){
   [hunger,energy,health,day,gameHour,gameMin,totalMins]=[80,85,100,1,8,0,0];
   emo=[30,40,65,60,20,10];entityDirty=0;
+  clearTimeout(rebirthTO);rebirthTO=null;
   isSleeping=false;isDead=false;allDead=false;deathCause='';stage=0;minutesSinceInteract=0;chatHistory=[];
   phys.x=scnW()/2-32;phys.y=gndY();phys.vx=0;phys.vy=0;
   clones.forEach(c=>c.el.remove());clones.length=0;
