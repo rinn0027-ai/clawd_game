@@ -376,11 +376,20 @@ function petEntity(ent) {
   emo[E.ATTACH]=Math.min(100,emo[E.ATTACH]+1);
   emo[E.LONE]  =Math.max(0,  emo[E.LONE]-12);
   clampEmo();
-  if (!isSleeping&&!actionLocked){setAnim('happy');lockAction(800);setTimeout(()=>{if(!isSleeping)setAnim('idle');},800);}
+  if (ent) {
+    // petting a clone — individual reaction
+    setCloneAnim(ent,'happy',900);
+  } else {
+    if (!isSleeping&&!actionLocked){setAnim('happy');lockAction(800);setTimeout(()=>{if(!isSleeping)setAnim('idle');},800);}
+  }
   showBubble(['🥰','😊','💕','✨'][Math.floor(Math.random()*4)]);
   spawnParticle('💗');
   setLog('Claw\'d 蹭了蹭你的手...');
   updateUI();
+}
+function setCloneAnim(c,name,ms=600){
+  c.anim=name;c.animLock=true;c.af=0;c.at=0;
+  setTimeout(()=>{c.animLock=false;},ms);
 }
 
 // ── ITEMS ──
@@ -478,7 +487,7 @@ function checkItemEntityHit(item,vel) {
     if ((isClone&&cr.dead)||Math.hypot(ic.x-(ex+32),ic.y-(ey+32))>54) return;
     if (item.type==='hammer'&&vel>100){
       if (!isClone){phys.vy=-290;emo[E.FEAR]=Math.min(100,emo[E.FEAR]+5);emo[E.HAPPY]=Math.min(100,emo[E.HAPPY]+3);}
-      else cr.vy=-290;
+      else{cr.vy=-290;setCloneAnim(cr,'sad',700);}
       item.vy*=-0.25;
       showBubble('💥 BONK!');spawnParticle('⚡');setLog('Claw\'d 被锤子打飞了！哈哈哈');clampEmo();
     } else if (item.type==='rock'){
@@ -542,7 +551,7 @@ function spawnClone(){
   const cCtx=cnv.getContext('2d');cCtx.imageSmoothingEnabled=false;
   el.appendChild(cnv);s.appendChild(el);
   const c={el,ctx:cCtx,x:phys.x+(Math.random()-.5)*40,y:phys.y,vx:(Math.random()-.5)*120,vy:-100-Math.random()*80,
-    af:0,at:0,age:0,flipX:false,dirty:entityDirty*0.7,dragging:false,dead:false};
+    af:0,at:0,age:0,anim:'idle',animLock:false,flipX:false,dirty:entityDirty*0.7,dragging:false,dead:false};
   el.addEventListener('pointerdown',e=>beginDrag(e,'clone',c));
   clones.push(c);
   spawnParticle('✨');
@@ -623,8 +632,11 @@ function physStep(dt){
       if (Math.abs(c.vx)>15) c.flipX=c.vx<0;
     }
     c.el.style.left=Math.round(c.x)+'px';c.el.style.top=Math.round(c.y)+'px';
-    c.age+=dt;c.at+=dt;if(c.at>1/1.5){c.at=0;c.af=(c.af+1)%4;}
-    drawEntityFrame(c.ctx,isSleeping?'sleep':'idle',c.af,c.flipX,c.dirty);
+    c.age+=dt;
+    if (!c.animLock) c.anim=currentAnim==='eat'?'idle':currentAnim;
+    const cDef=ANIM_DEFS[c.anim];
+    c.at+=dt;if(c.at>=1/cDef.fps){c.at=0;c.af=(c.af+1)%cDef.frames;}
+    drawEntityFrame(c.ctx,c.anim,c.af,c.flipX,c.dirty);
   }
 
   // ── ITEMS ──
