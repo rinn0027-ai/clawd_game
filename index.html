@@ -585,9 +585,10 @@ function physStep(dt){
   const gY=gndY(),sW=scnW(),s=scn();
 
   // ── MAIN ──
-  // Safety: if character escaped bounds (stale drag, etc.), snap back
-  if (phys.x<-30||phys.x>scnW()+30||phys.y<-30||phys.y>scnH()+30){
-    phys.x=Math.max(0,Math.min(scnW()-ESIZ,phys.x));
+  // Safety snap only when scene has real dimensions (avoids false triggers during init)
+  const sh=scnH();
+  if (sh>50&&(phys.x<-30||phys.x>sW+30||phys.y<-30||phys.y>sh+30)){
+    phys.x=Math.max(0,Math.min(sW-ESIZ,phys.x));
     phys.y=Math.max(0,Math.min(gY,phys.y));
     phys.vx=0;phys.vy=0;
   }
@@ -670,7 +671,7 @@ function loop(ts){
   if (!lastTs) lastTs=ts;
   const dt=Math.min((ts-lastTs)/1000,0.05);
   lastTs=ts;
-  tickAnim(dt);physStep(dt);
+  try{tickAnim(dt);physStep(dt);}catch(err){console.error('loop err',err);}
   if (isSleeping) tickZzz(dt);
   accumSec+=dt;
   while (accumSec>=SECS_PER_GMIN){accumSec-=SECS_PER_GMIN;gameTick();}
@@ -928,7 +929,7 @@ function loadGame(){
 }
 function initPhys(){
   const w=scnW(),h=scn().offsetHeight;
-  if(w<10){setTimeout(initPhys,50);return;}
+  if(w<10||h<10){setTimeout(initPhys,50);return;}
   phys.x=phys._sx??w/2-32;phys.y=phys._sy??h*0.55-ESIZ;
   document.getElementById('clawd-wrap').style.left=Math.round(phys.x)+'px';
   document.getElementById('clawd-wrap').style.top=Math.round(phys.y)+'px';
@@ -936,6 +937,7 @@ function initPhys(){
 }
 setInterval(saveGame,30000);setInterval(updateUI,500);
 buildScene();loadGame();updateUI();updateProviderUI();drawFrame();initPhys();
+document.getElementById('clawd-wrap').addEventListener('pointerdown',e=>beginDrag(e,'main'),{passive:false});
 requestAnimationFrame(loop);
 </script>
 </body>
