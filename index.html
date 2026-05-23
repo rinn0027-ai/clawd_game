@@ -190,6 +190,11 @@ html,body{width:100%;height:100%;background:var(--bg);display:flex;align-items:c
 .msg.player{align-self:flex-end;color:#aadcff;border-color:#1a3050;background:#0a1828}
 .msg.clawd{align-self:flex-start;color:var(--accent);border-color:#2a1e00;background:#1a1200}
 #api-row{padding:6px 8px;border-top:1px solid var(--border);display:flex;gap:4px;flex-shrink:0;align-items:center}
+#proxy-row{padding:3px 8px 5px;display:flex;gap:4px;flex-shrink:0;align-items:center}
+#proxy-input{flex:1;background:#0d0d1e;border:1px solid var(--border2);color:var(--dim);
+  font-family:'Press Start 2P',monospace;font-size:5px;padding:4px 6px;min-width:0}
+#proxy-save{background:#1a1a2e;border:1px solid var(--border2);color:var(--text);
+  font-family:'Press Start 2P',monospace;font-size:5px;padding:4px 6px;cursor:pointer;white-space:nowrap;flex-shrink:0}
 #provider-btn{background:#1a1a2e;border:1px solid var(--accent);color:var(--accent);
   font-family:'Press Start 2P',monospace;font-size:5px;padding:5px 5px;cursor:pointer;white-space:nowrap;flex-shrink:0}
 #provider-btn.gemini{border-color:#4a8fff;color:#4a8fff}
@@ -277,6 +282,10 @@ html,body{width:100%;height:100%;background:var(--bg);display:flex;align-items:c
       <button id="provider-btn" onclick="toggleProvider()" title="切换 API 提供商">Anthropic</button>
       <input id="api-input" type="password" placeholder="Anthropic API Key">
       <button id="api-save" onclick="saveKey()">保存</button>
+    </div>
+    <div id="proxy-row" style="display:none">
+      <input id="proxy-input" type="text" placeholder="代理地址（选填）如: https://你的代理.com">
+      <button id="proxy-save" onclick="saveProxy()">保存</button>
     </div>
     <div id="input-row">
       <input id="chat-input" type="text" placeholder="和 Claw'd 说话...">
@@ -377,6 +386,7 @@ let wanderDir = 0;
 let wanderTimer = 0;
 let apiKey = localStorage.getItem('clawd_apikey') || '';
 let geminiKey = localStorage.getItem('clawd_geminikey') || '';
+let geminiProxy = localStorage.getItem('clawd_geminiproxy') || '';
 let apiProvider = localStorage.getItem('clawd_provider') || 'anthropic';
 let chatHistory = [];
 
@@ -740,15 +750,29 @@ function toggleProvider() {
 function updateProviderUI() {
   const btn = document.getElementById('provider-btn');
   const inp = document.getElementById('api-input');
+  const proxyRow = document.getElementById('proxy-row');
+  const proxyInp = document.getElementById('proxy-input');
   if (apiProvider === 'gemini') {
     btn.textContent = 'Gemini';
     btn.classList.add('gemini');
     inp.placeholder = geminiKey ? 'Gemini Key 已保存 ✓' : 'Google Gemini API Key';
+    proxyRow.style.display = 'flex';
+    proxyInp.placeholder = geminiProxy ? `代理: ${geminiProxy.slice(0,28)}...` : '代理地址（选填）如: https://你的代理.com';
   } else {
     btn.textContent = 'Anthropic';
     btn.classList.remove('gemini');
     inp.placeholder = apiKey ? 'API Key 已保存 ✓' : 'Anthropic API Key';
+    proxyRow.style.display = 'none';
   }
+}
+
+function saveProxy() {
+  const v = document.getElementById('proxy-input').value.trim();
+  geminiProxy = v;
+  if (v) localStorage.setItem('clawd_geminiproxy', v);
+  else localStorage.removeItem('clawd_geminiproxy');
+  document.getElementById('proxy-input').value = '';
+  updateProviderUI();
 }
 
 function saveKey() {
@@ -799,8 +823,9 @@ async function sendChat() {
         role: m.role === 'assistant' ? 'model' : 'user',
         parts: [{text: m.content}]
       }));
-      const resp = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${activeKey}`,
+      const geminiEndpoint = geminiProxy ||
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
+      const resp = await fetch(`${geminiEndpoint}?key=${activeKey}`,
         {
           method: 'POST',
           headers: {'Content-Type':'application/json'},
