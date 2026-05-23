@@ -9,19 +9,14 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#0d0d1a;--panel:#111122;--border:#1e1e3a;--border2:#2a2a50;
-  --orange:#c4724a;--dark:#8b4a2e;--hi:#e09060;
-  --accent:#f5c842;--accent2:#e85d3a;
-  --blue:#4a8fff;--pink:#ff6699;--green:#44dd88;--purple:#cc88ff;
+  --accent:#f5c842;--accent2:#e85d3a;--blue:#4a8fff;
   --text:#e8dcc8;--dim:#5a5a7a;--bar-h:5px;
 }
 html,body{width:100%;height:100%;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden}
-#shell{
-  width:min(340px,100vw);height:min(600px,100vh);
-  background:var(--panel);border:2px solid var(--border2);
+#shell{width:min(340px,100vw);height:min(600px,100vh);background:var(--panel);border:2px solid var(--border2);
   box-shadow:0 0 60px rgba(196,114,74,.12),inset 0 1px 0 rgba(255,255,255,.04);
   display:flex;flex-direction:column;position:relative;overflow:hidden;
-  font-family:'Press Start 2P',monospace;image-rendering:pixelated;
-}
+  font-family:'Press Start 2P',monospace;image-rendering:pixelated;}
 #shell::after{content:'';position:absolute;inset:0;
   background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);
   pointer-events:none;z-index:100;}
@@ -59,26 +54,31 @@ html,body{width:100%;height:100%;background:var(--bg);display:flex;align-items:c
 @keyframes pfloat{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-36px) scale(.6)}}
 .zzz-p{color:#6aadff;font-size:8px;animation:pfloat 2.2s ease-out forwards}
 #emotions{background:#0a0a16;border-top:1px solid var(--border);border-bottom:1px solid var(--border);
-  padding:7px 10px 6px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px 8px;flex-shrink:0;}
+  padding:6px 10px 5px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 8px;flex-shrink:0;}
 .emo{display:flex;flex-direction:column;gap:2px}
-.emo-label{font-size:5px;color:var(--dim);display:flex;justify-content:space-between;align-items:center}
+.emo-label{font-size:5px;color:var(--dim);display:flex;justify-content:space-between}
 .emo-track{height:var(--bar-h);background:#0e0e20;border:1px solid var(--border)}
-.emo-fill{height:100%;transition:width .6s ease,background .6s}
+.emo-fill{height:100%;transition:width .6s ease}
 #ptag{text-align:center;font-size:6px;color:var(--accent);padding:3px 0 2px;
   background:#0a0a16;letter-spacing:1px;border-bottom:1px solid var(--border);flex-shrink:0;}
-#log{background:#07070f;padding:5px 10px;font-size:6px;color:var(--accent);line-height:1.9;
-  min-height:20px;flex-shrink:0;border-bottom:1px solid var(--border);
+#log{background:#07070f;padding:4px 10px;font-size:6px;color:var(--accent);line-height:1.9;
+  min-height:18px;flex-shrink:0;border-bottom:1px solid var(--border);
   overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
-#actions{padding:8px 8px 10px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
+#items-row{padding:3px 6px;display:flex;gap:3px;background:#0a0a16;
+  border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;}
+.ibtn{background:#0d0d1e;border:1px solid var(--border2);color:var(--text);
+  font-family:'Press Start 2P',monospace;font-size:5px;padding:3px 5px;
+  cursor:pointer;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:1px;}
+.ibtn span{font-size:15px;line-height:1;}
+.ibtn:active{background:#1a1a30;}
+#actions{padding:6px 8px 8px;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;
   background:#0a0a16;flex-shrink:0;}
 .btn{background:#0d0d1e;border:1px solid var(--border2);color:var(--text);
-  font-family:'Press Start 2P',monospace;font-size:5px;padding:6px 2px;
-  display:flex;flex-direction:column;align-items:center;gap:4px;
-  cursor:pointer;transition:background .1s,border-color .1s,transform .08s;user-select:none;}
+  font-family:'Press Start 2P',monospace;font-size:5px;padding:5px 2px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;user-select:none;}
 .btn:hover{background:#1a1a30;border-color:var(--accent)}
-.btn:active{transform:scale(.94);background:#22223a}
-.btn .bi{font-size:16px;line-height:1}
-.btn.locked{opacity:.35;pointer-events:none}
+.btn:active{transform:scale(.94)}
+.btn .bi{font-size:15px;line-height:1}
 #chat-panel{position:absolute;inset:0;background:#08080f;display:flex;flex-direction:column;
   z-index:50;transform:translateY(100%);transition:transform .25s ease;}
 #chat-panel.open{transform:translateY(0)}
@@ -92,24 +92,22 @@ html,body{width:100%;height:100%;background:var(--bg);display:flex;align-items:c
 .msg.clawd{align-self:flex-start;color:var(--accent);border-color:#2a1e00;background:#1a1200}
 #api-row{padding:6px 8px;border-top:1px solid var(--border);display:flex;gap:4px;flex-shrink:0;align-items:center}
 #proxy-row{padding:3px 8px 5px;display:flex;gap:4px;flex-shrink:0;align-items:center}
-#proxy-input{flex:1;background:#0d0d1e;border:1px solid var(--border2);color:var(--dim);
-  font-family:'Press Start 2P',monospace;font-size:5px;padding:4px 6px;min-width:0}
-#proxy-save{background:#1a1a2e;border:1px solid var(--border2);color:var(--text);
-  font-family:'Press Start 2P',monospace;font-size:5px;padding:4px 6px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+#proxy-input,#chat-input{flex:1;background:#0d0d1e;border:1px solid var(--border2);color:var(--text);
+  font-family:'Press Start 2P',monospace;padding:5px 6px;min-width:0}
+#proxy-input{font-size:5px;color:var(--dim)}
+#chat-input{font-size:7px;}
+#chat-input::placeholder{color:var(--dim)}
+#proxy-save,#api-save,#send-btn{background:#1a1a2e;border:1px solid var(--border2);color:var(--text);
+  font-family:'Press Start 2P',monospace;font-size:5px;padding:5px 6px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+#api-save{font-size:6px;}
+#send-btn{border-color:var(--accent);color:var(--accent);font-size:6px;padding:6px 8px;}
+#send-btn:active{background:#2a2a10}
 #provider-btn{background:#1a1a2e;border:1px solid var(--accent);color:var(--accent);
   font-family:'Press Start 2P',monospace;font-size:5px;padding:5px 5px;cursor:pointer;white-space:nowrap;flex-shrink:0}
 #provider-btn.gemini{border-color:#4a8fff;color:#4a8fff}
 #api-input{flex:1;background:#0d0d1e;border:1px solid var(--border2);color:var(--dim);
   font-family:'Press Start 2P',monospace;font-size:6px;padding:5px 6px;min-width:0}
-#api-save{background:#1a1a2e;border:1px solid var(--border2);color:var(--text);
-  font-family:'Press Start 2P',monospace;font-size:6px;padding:5px 7px;cursor:pointer;white-space:nowrap;flex-shrink:0}
 #input-row{padding:6px 8px 8px;border-top:1px solid var(--border);display:flex;gap:4px;flex-shrink:0}
-#chat-input{flex:1;background:#0d0d1e;border:1px solid var(--border2);color:var(--text);
-  font-family:'Press Start 2P',monospace;font-size:7px;padding:6px 8px}
-#chat-input::placeholder{color:var(--dim)}
-#send-btn{background:#1a1a2e;border:1px solid var(--accent);color:var(--accent);
-  font-family:'Press Start 2P',monospace;font-size:6px;padding:6px 8px;cursor:pointer}
-#send-btn:active{background:#2a2a10}
 #death{position:absolute;inset:0;background:rgba(0,0,0,.88);display:none;
   flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:90;}
 #death h2{font-size:11px;color:var(--accent2);text-align:center;line-height:2}
@@ -147,11 +145,19 @@ html,body{width:100%;height:100%;background:var(--bg);display:flex;align-items:c
   </div>
   <div id="ptag">平平无奇</div>
   <div id="log">Claw'd 出生了，好好照顾它吧 ♥</div>
+  <div id="items-row">
+    <button class="ibtn" onclick="spawnItem('ball')"><span>🔵</span>球</button>
+    <button class="ibtn" onclick="spawnItem('hammer')"><span>🔨</span>锤</button>
+    <button class="ibtn" onclick="spawnItem('rock')"><span>🪨</span>石头</button>
+    <button class="ibtn" onclick="spawnItem('bucket')"><span>🪣</span>水桶</button>
+    <button class="ibtn" onclick="spawnItem('soap')"><span>🧼</span>肥皂</button>
+    <button class="ibtn" onclick="clearItems()"><span>🗑️</span>清理</button>
+  </div>
   <div id="actions">
-    <button class="btn" id="btn-feed" onclick="doAction('feed')"><span class="bi">🍎</span>喂食</button>
-    <button class="btn" id="btn-play" onclick="doAction('play')"><span class="bi">🎮</span>玩耍</button>
+    <button class="btn" onclick="doAction('feed')"><span class="bi">🍎</span>喂食</button>
+    <button class="btn" onclick="doAction('play')"><span class="bi">🎮</span>玩耍</button>
     <button class="btn" id="btn-sleep" onclick="doAction('sleep')"><span class="bi">💤</span>睡觉</button>
-    <button class="btn" id="btn-chat" onclick="toggleChat()"><span class="bi">💬</span>对话</button>
+    <button class="btn" onclick="toggleChat()"><span class="bi">💬</span>对话</button>
   </div>
   <div id="chat-panel">
     <div id="chat-header">
@@ -190,364 +196,428 @@ const SPRITE_DATA = {
 "sad": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAQCAYAAACm53kpAAABK0lEQVR4nGNgGAWjYBSMghEMGNEF7kxL+Y9Pg0rWHAw91NA7UG5A4dyZlvL/xZ1neB13/MYThtJtl7AGHLl6B9INLLgUYQOWGjJ4DadU70C4AWsAZC3ehNWA861ZBC2nRO9AuIEJXSBsxQWsmlV1rQhaTInegXIDRgCsijDAqvj25WM4DUfXO/24PMl6kUHRrKcYbph+XJ4kN6ADXHoxAgCmGJfhhAAlegfCDVjLAFhegRUmpBRg51uzGBictlZOi/VrJ1UvEqg835rVjuwGxqyLcDGi3MBAnPsxqpJuLz289Si+aowSvYPKDUeKvP4fKfL6j4tPK70D4QZsWUADqR7VYGBAqVc1GBgYbuCxmxK9VHUDY9bFrQx9jBoMDAwMJ5y2bv0/Td8bm14AgLfzufVQWrYAAAAASUVORK5CYII="
 };
 
-// ── SPRITE RENDERER ──
+// ── RENDERER ──
 const canvas = document.getElementById('clawd-canvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
-
 const spriteImgs = {};
-for (const [name, src] of Object.entries(SPRITE_DATA)) {
-  const img = new Image();
-  img.src = src;
-  spriteImgs[name] = img;
+for (const [k,src] of Object.entries(SPRITE_DATA)) {
+  const img = new Image(); img.src = src; spriteImgs[k] = img;
 }
+const ANIM_DEFS = {idle:{frames:4,fps:1.5},sleep:{frames:4,fps:0.7},eat:{frames:4,fps:3},happy:{frames:4,fps:4},sad:{frames:4,fps:1.2}};
+let currentAnim='idle', animFrame=0, animTimer=0, flipX=false;
 
-const ANIM_DEFS = {
-  idle:  {frames:4,fps:1.5}, sleep:{frames:4,fps:0.7},
-  eat:   {frames:4,fps:3.0}, happy:{frames:4,fps:4.0}, sad:{frames:4,fps:1.2},
-};
-let currentAnim = 'idle', animFrame = 0, animTimer = 0, flipX = false;
-
-function drawEntityFrame(ectx, anim, frame, flip) {
+// Draw sprite frame with optional dirty overlay (0-100)
+function drawEntityFrame(ectx, anim, frame, flip, dirty=0) {
   const img = spriteImgs[anim];
-  if (!img || !img.complete) return;
+  if (!img||!img.complete) return;
   ectx.clearRect(0,0,16,16);
   ectx.save();
-  if (flip) { ectx.translate(16,0); ectx.scale(-1,1); }
+  if (flip){ectx.translate(16,0);ectx.scale(-1,1);}
   ectx.drawImage(img, frame*16, 0, 16, 16, 0, 0, 16, 16);
+  if (dirty>5) {
+    const spots=[[2,8],[5,12],[9,6],[12,10],[7,14],[3,4],[11,3],[8,11],[14,7],[4,14],[6,5],[10,13]];
+    const cnt = Math.min(spots.length, Math.ceil(dirty/8));
+    ectx.globalAlpha = Math.min(0.8, dirty/100*0.9);
+    ectx.fillStyle='#6b3a1a';
+    for (let i=0;i<cnt;i++) ectx.fillRect(spots[i][0],spots[i][1],1,1);
+    ectx.globalAlpha=1;
+  }
   ectx.restore();
 }
-function drawFrame() { drawEntityFrame(ctx, currentAnim, animFrame, flipX); }
-
+function drawFrame() { drawEntityFrame(ctx, currentAnim, animFrame, flipX, entityDirty); }
 function tickAnim(dt) {
-  const def = ANIM_DEFS[currentAnim];
-  animTimer += dt;
-  if (animTimer >= 1/def.fps) { animTimer=0; animFrame=(animFrame+1)%def.frames; drawFrame(); }
+  const def=ANIM_DEFS[currentAnim];
+  animTimer+=dt;
+  if (animTimer>=1/def.fps){animTimer=0;animFrame=(animFrame+1)%def.frames;drawFrame();}
 }
-function setAnim(name, resetFrame=true) {
-  if (currentAnim===name && !resetFrame) return;
+function setAnim(name,reset=true) {
+  if (currentAnim===name&&!reset) return;
   currentAnim=name;
-  if (resetFrame) { animFrame=0; animTimer=0; }
+  if (reset){animFrame=0;animTimer=0;}
   drawFrame();
 }
 
 // ── GAME STATE ──
-const E = {LONE:0,TRUST:1,HAPPY:2,CURIO:3,ATTACH:4,FEAR:5};
-let emo = [30,40,65,60,20,10];
-let hunger=80, energy=85, health=100;
-let day=1, gameHour=8, gameMin=0, totalMins=0;
-let isSleeping=false, isDead=false, stage=0;
-let minutesSinceInteract=0, actionLocked=false;
+const E={LONE:0,TRUST:1,HAPPY:2,CURIO:3,ATTACH:4,FEAR:5};
+let emo=[30,40,65,60,20,10];
+let hunger=80,energy=85,health=100;
+let day=1,gameHour=8,gameMin=0,totalMins=0;
+let isSleeping=false,isDead=false,stage=0;
+let minutesSinceInteract=0,actionLocked=false;
+let entityDirty=0;
+let wanderTimer=0;
 let apiKey=localStorage.getItem('clawd_apikey')||'';
 let geminiKey=localStorage.getItem('clawd_geminikey')||'';
 let geminiProxy=localStorage.getItem('clawd_geminiproxy')||'';
 let apiProvider=localStorage.getItem('clawd_provider')||'anthropic';
 let chatHistory=[];
-
 const STAGE_NAMES=['蛋','婴儿','幼儿','少年','成年','老年'];
 const STAGE_DAYS=[0,1,5,15,30,60];
 const DRIFT=[.40,-.02,-.20,-.15,-.005,-.30];
 
 // ── PHYSICS ──
-const GRAV=700, BOUNCE=0.42, GFRIC=0.80, AFRIC=0.998, ESIZ=64;
+const GRAV=700,BNCE=0.42,GFRIC=0.80,AFRIC=0.998,ESIZ=64;
 const phys={x:100,y:100,vx:0,vy:0};
-let isDragging=false, dragMoved=false;
-let dragOffX=0, dragOffY=0, prevDX=0, prevDY=0, prevDT=0;
-let wanderTimer=0;
+const clones=[], items=[], apples=[];
+const trailPool=[], trailPos=[];
 
-// Trail pool
-const trailPool=[];
-// Clones array
-const clones=[];
-// Apples array
-const apples=[];
+function scn(){return document.getElementById('scene');}
+function gndY(){const s=scn();return s.offsetHeight*0.55-ESIZ;}
+function scnW(){return scn().offsetWidth;}
+function scnH(){return scn().offsetHeight;}
 
-function scn() { return document.getElementById('scene'); }
-function gndY() { const s=scn(); return s.offsetHeight*0.55-ESIZ; }
-function scnW() { return scn().offsetWidth; }
+// ── ITEM DEFINITIONS ──
+const ITEM_DEFS={
+  ball:  {emoji:'🔵',size:22,mass:0.4,bounce:0.80,fs:20},
+  hammer:{emoji:'🔨',size:24,mass:0.9,bounce:0.12,fs:22},
+  rock:  {emoji:'🪨',size:30,mass:2.8,bounce:0.06,fs:26},
+  bucket:{emoji:'🪣',size:24,mass:0.6,bounce:0.22,fs:22},
+  soap:  {emoji:'🧼',size:18,mass:0.3,bounce:0.42,fs:16},
+};
 
-// ── DRAG ──
-const clawdWrap = document.getElementById('clawd-wrap');
+// ── UNIFIED DRAG ──
+let activeDrag=null;
 
-clawdWrap.addEventListener('pointerdown', e=>{
-  if (isDead) return;
+function beginDrag(e, kind, ref=null) {
+  if (kind!=='item'&&isDead) return;
   e.preventDefault(); e.stopPropagation();
-  isDragging=true; dragMoved=false;
-  clawdWrap.setPointerCapture(e.pointerId);
   const r=scn().getBoundingClientRect();
   const cx=e.clientX-r.left, cy=e.clientY-r.top;
-  dragOffX=cx-phys.x; dragOffY=cy-phys.y;
-  prevDX=cx; prevDY=cy; prevDT=e.timeStamp;
-  phys.vx=0; phys.vy=0;
-  clawdWrap.style.cursor='grabbing';
-  minutesSinceInteract=0;
-},{passive:false});
+  const px=kind==='main'?phys.x:ref.x;
+  const py=kind==='main'?phys.y:ref.y;
+  activeDrag={kind,ref,offX:cx-px,offY:cy-py,prevX:cx,prevY:cy,prevT:e.timeStamp,moved:false};
+  const capEl=kind==='main'?document.getElementById('clawd-wrap'):ref.el;
+  try{capEl.setPointerCapture(e.pointerId);}catch(err){}
+  if (kind==='main'){phys.vx=0;phys.vy=0;document.getElementById('clawd-wrap').style.cursor='grabbing';}
+  else if (kind==='clone'){ref.vx=0;ref.vy=0;ref.dragging=true;ref.el.style.cursor='grabbing';}
+  else{ref.vx=0;ref.vy=0;}
+  if (kind!=='item') minutesSinceInteract=0;
+}
 
 window.addEventListener('pointermove', e=>{
-  if (!isDragging) return;
+  if (!activeDrag) return;
   e.preventDefault();
   const r=scn().getBoundingClientRect();
   const cx=e.clientX-r.left, cy=e.clientY-r.top;
-  if (Math.abs(cx-prevDX)+Math.abs(cy-prevDY)>5) dragMoved=true;
-  phys.x=cx-dragOffX; phys.y=cy-dragOffY;
-  prevDX=cx; prevDY=cy; prevDT=e.timeStamp;
+  if (Math.abs(cx-activeDrag.prevX)+Math.abs(cy-activeDrag.prevY)>5) activeDrag.moved=true;
+  const nx=cx-activeDrag.offX, ny=cy-activeDrag.offY;
+  if (activeDrag.kind==='main'){phys.x=nx;phys.y=ny;}
+  else{activeDrag.ref.x=nx;activeDrag.ref.y=ny;}
+  if (activeDrag.kind==='item'){
+    activeDrag.ref.el.style.left=Math.round(nx)+'px';
+    activeDrag.ref.el.style.top=Math.round(ny)+'px';
+    checkClean(activeDrag.ref);
+  }
+  activeDrag.prevX=cx;activeDrag.prevY=cy;activeDrag.prevT=e.timeStamp;
 },{passive:false});
 
 window.addEventListener('pointerup', e=>{
-  if (!isDragging) return;
-  isDragging=false;
-  clawdWrap.style.cursor='grab';
+  if (!activeDrag) return;
   const r=scn().getBoundingClientRect();
   const cx=e.clientX-r.left, cy=e.clientY-r.top;
-  const dt=Math.max(0.016,(e.timeStamp-prevDT)/1000);
-  phys.vx=(cx-prevDX)/dt*0.85;
-  phys.vy=(cy-prevDY)/dt*0.85;
-  const spd=Math.hypot(phys.vx,phys.vy);
-  if (spd>900){phys.vx=phys.vx/spd*900;phys.vy=phys.vy/spd*900;}
-
-  if (!dragMoved) {
-    petClawd();
-  } else {
-    minutesSinceInteract=0;
-    emo[E.HAPPY]=Math.min(100,emo[E.HAPPY]+3);
-    clampEmo();
-    if (spd>320 && clones.length<5 && Math.random()<0.55) spawnClone();
-    checkTreeHit(spd);
+  const dt=Math.max(0.016,(e.timeStamp-activeDrag.prevT)/1000);
+  let vx=(cx-activeDrag.prevX)/dt*0.85;
+  let vy=(cy-activeDrag.prevY)/dt*0.85;
+  const spd=Math.hypot(vx,vy);
+  if (spd>900){vx=vx/spd*900;vy=vy/spd*900;}
+  const {kind,ref,moved}=activeDrag;
+  activeDrag=null;
+  if (kind==='main'){
+    document.getElementById('clawd-wrap').style.cursor='grab';
+    if (!moved){petEntity(null);}
+    else{
+      phys.vx=vx;phys.vy=vy;
+      emo[E.HAPPY]=Math.min(100,emo[E.HAPPY]+3);clampEmo();
+      if (spd>320&&clones.length<5&&Math.random()<0.55) spawnClone();
+      checkTreeHit(spd);
+    }
+  } else if (kind==='clone'){
+    ref.dragging=false;ref.el.style.cursor='grab';
+    if (!moved){petEntity(ref);}
+    else{ref.vx=vx;ref.vy=vy;ref.age=Math.max(0,ref.age-8);}
+  } else if (kind==='item'){
+    ref.vx=vx;ref.vy=vy;
+    checkClean(ref);
   }
 });
 
-function petClawd() {
+function petEntity(ent) {
   if (isDead) return;
   minutesSinceInteract=0;
-  emo[E.HAPPY] =Math.min(100,emo[E.HAPPY]+10);
-  emo[E.TRUST] =Math.min(100,emo[E.TRUST]+3);
-  emo[E.FEAR]  =Math.max(0,  emo[E.FEAR]-12);
+  emo[E.HAPPY] =Math.min(100,emo[E.HAPPY]+8);
+  emo[E.TRUST] =Math.min(100,emo[E.TRUST]+2);
+  emo[E.FEAR]  =Math.max(0,  emo[E.FEAR]-10);
   emo[E.ATTACH]=Math.min(100,emo[E.ATTACH]+1);
-  emo[E.LONE]  =Math.max(0,  emo[E.LONE]-15);
+  emo[E.LONE]  =Math.max(0,  emo[E.LONE]-12);
   clampEmo();
-  if (!isSleeping&&!actionLocked){
-    setAnim('happy'); lockAction(1000);
-    setTimeout(()=>{if(!isSleeping)setAnim('idle');},1000);
-  }
+  if (!isSleeping&&!actionLocked){setAnim('happy');lockAction(800);setTimeout(()=>{if(!isSleeping)setAnim('idle');},800);}
   showBubble(['🥰','😊','💕','✨'][Math.floor(Math.random()*4)]);
   spawnParticle('💗');
   setLog('Claw\'d 蹭了蹭你的手...');
   updateUI();
 }
 
-// ── TREE COLLISION ──
-function checkTreeHit(speed) {
-  if (speed<80) return;
-  const s=scn();
-  const tL=s.offsetWidth-36-36, tT=s.offsetHeight*0.55-52;
-  if (phys.x+ESIZ>tL && phys.x<tL+36 && phys.y<tT+52 && apples.length<3) {
-    shakeTree(); spawnApple(tL+6+Math.random()*22, tT-8);
-  }
+// ── ITEMS ──
+function spawnItem(type) {
+  if (items.length>=10) return;
+  const def=ITEM_DEFS[type];
+  const el=document.createElement('div');
+  el.style.cssText=`position:absolute;font-size:${def.fs}px;line-height:1;cursor:grab;touch-action:none;user-select:none;z-index:8;`;
+  el.textContent=def.emoji;
+  const x=scnW()*(0.2+Math.random()*0.6);
+  const y=20+Math.random()*20;
+  el.style.left=x+'px';el.style.top=y+'px';
+  scn().appendChild(el);
+  const item={type,el,x,y,vx:(Math.random()-.5)*50,vy:0,size:def.size,mass:def.mass,bounce:def.bounce};
+  el.addEventListener('pointerdown',e=>beginDrag(e,'item',item));
+  items.push(item);
 }
 
-function shakeTree() {
-  const t=document.getElementById('tree');
-  [6,-4,3,-2,0].forEach((deg,i)=>{
-    setTimeout(()=>{ t.style.transition='transform 0.08s'; t.style.transform=`rotate(${deg}deg)`; },i*80);
+function clearItems() {
+  items.forEach(it=>it.el.remove());
+  items.length=0;
+}
+
+function checkClean(item) {
+  if (item.type!=='bucket'&&item.type!=='soap') return;
+  const pw=item.type==='soap'?4:2;
+  const cx=item.x+item.size/2, cy=item.y+item.size/2;
+  if (Math.hypot(cx-(phys.x+32),cy-(phys.y+32))<48&&entityDirty>0){
+    entityDirty=Math.max(0,entityDirty-pw);
+    if (entityDirty===0){spawnParticle('💧');showBubble('✨ 干净啦');setLog('Claw\'d 被洗干净了！');emo[E.HAPPY]=Math.min(100,emo[E.HAPPY]+0.5);}
+  }
+  clones.forEach(c=>{
+    if (Math.hypot(cx-(c.x+32),cy-(c.y+32))<48&&c.dirty>0) c.dirty=Math.max(0,c.dirty-pw);
   });
 }
 
-function spawnApple(x,y) {
+function checkItemEntityHit(item,vel) {
+  const ic={x:item.x+item.size/2,y:item.y+item.size/2};
+  const check=(ex,ey,isClone,cr)=>{
+    if (Math.hypot(ic.x-(ex+32),ic.y-(ey+32))>52) return;
+    if (item.type==='hammer'&&vel>100){
+      if (!isClone){phys.vy=-280;emo[E.FEAR]=Math.min(100,emo[E.FEAR]+4);emo[E.HAPPY]=Math.min(100,emo[E.HAPPY]+3);}
+      else cr.vy=-280;
+      item.vy*=-0.25;
+      showBubble('💥 BONK!');spawnParticle('⚡');setLog('Claw\'d 被锤子打飞了！哈哈哈');clampEmo();
+    } else if (item.type==='rock'&&vel>150){
+      if (!isClone){emo[E.FEAR]=Math.min(100,emo[E.FEAR]+10);emo[E.HAPPY]=Math.max(0,emo[E.HAPPY]-5);}
+      const el=isClone?cr.el:document.getElementById('clawd-wrap');
+      el.style.transition='transform 0.1s';
+      el.style.transform='scaleY(0.45) scaleX(1.6)';
+      setTimeout(()=>{el.style.transform='scaleY(1.3) scaleX(0.85)';setTimeout(()=>{el.style.transform='';el.style.transition='';},150);},100);
+      showBubble('😵');spawnParticle('💢');setLog('大石头把 Claw\'d 压扁了！');clampEmo();
+    }
+  };
+  check(phys.x,phys.y,false,null);
+  clones.forEach(c=>check(c.x,c.y,true,c));
+}
+
+function checkBallCollision(ball) {
+  const bcx=ball.x+ball.size/2, bcy=ball.y+ball.size/2;
+  const check=(ent)=>{
+    const dx=bcx-(ent.x+32), dy=bcy-(ent.y+32);
+    const dist=Math.hypot(dx,dy);
+    if (dist>42||dist<1) return;
+    const nx=dx/dist, ny=dy/dist;
+    const rel=(ball.vx-ent.vx)*nx+(ball.vy-ent.vy)*ny;
+    if (rel>=0) return;
+    const j=rel*1.7;
+    ball.vx-=nx*j;ball.vy-=ny*j;
+    ent.vx+=nx*j*0.28;ent.vy+=ny*j*0.28;
+    const pen=42-dist;
+    ball.x+=nx*pen*0.65;ball.y+=ny*pen*0.65;
+    if (Math.abs(rel)>40){emo[E.HAPPY]=Math.min(100,emo[E.HAPPY]+0.8);clampEmo();}
+  };
+  check(phys);
+  clones.forEach(c=>check(c));
+}
+
+// ── TREE / APPLE ──
+function checkTreeHit(speed) {
+  if (speed<80) return;
   const s=scn();
+  const tL=s.offsetWidth-72,tT=s.offsetHeight*0.55-52;
+  if (phys.x+ESIZ>tL&&phys.x<tL+36&&phys.y<tT+52&&apples.length<3){
+    shakeTree();spawnApple(tL+6+Math.random()*22,tT-8);
+  }
+}
+function shakeTree(){
+  const t=document.getElementById('tree');
+  [6,-4,3,-2,0].forEach((d,i)=>setTimeout(()=>{t.style.transition='transform 0.08s';t.style.transform=`rotate(${d}deg)`;},i*80));
+}
+function spawnApple(x,y){
   const el=document.createElement('div');
-  el.style.cssText=`position:absolute;width:10px;height:10px;background:#c82020;
-    box-shadow:inset -2px -2px 0 #801010;z-index:5;`;
-  el.style.left=x+'px'; el.style.top=y+'px';
-  s.appendChild(el);
+  el.style.cssText=`position:absolute;width:10px;height:10px;background:#c82020;box-shadow:inset -2px -2px 0 #801010;z-index:5;`;
+  el.style.left=x+'px';el.style.top=y+'px';
+  scn().appendChild(el);
   apples.push({el,x,y,vx:(Math.random()-.5)*80,vy:-70});
   setLog('苹果掉下来了！快去捡！');
 }
 
 // ── CLONES ──
-function spawnClone() {
+function spawnClone(){
   const s=scn();
   const el=document.createElement('div');
-  el.style.cssText='position:absolute;pointer-events:none;';
+  el.style.cssText='position:absolute;cursor:grab;touch-action:none;user-select:none;';
   const cnv=document.createElement('canvas');
-  cnv.width=16; cnv.height=16;
+  cnv.width=16;cnv.height=16;
   cnv.style.cssText='display:block;width:64px;height:64px;image-rendering:pixelated;filter:drop-shadow(0 4px 0 rgba(0,0,0,.4));';
-  const cCtx=cnv.getContext('2d');
-  cCtx.imageSmoothingEnabled=false;
-  el.appendChild(cnv);
-  s.appendChild(el);
-  clones.push({
-    el,ctx:cCtx,
-    x:phys.x+(Math.random()-.5)*40, y:phys.y,
-    vx:(Math.random()-.5)*120, vy:-100-Math.random()*80,
-    af:0, at:0, flipX:false, age:0,
-  });
+  const cCtx=cnv.getContext('2d');cCtx.imageSmoothingEnabled=false;
+  el.appendChild(cnv);s.appendChild(el);
+  const c={el,ctx:cCtx,x:phys.x+(Math.random()-.5)*40,y:phys.y,vx:(Math.random()-.5)*120,vy:-100-Math.random()*80,
+    af:0,at:0,flipX:false,age:0,dirty:entityDirty*0.7,dragging:false};
+  el.addEventListener('pointerdown',e=>beginDrag(e,'clone',c));
+  clones.push(c);
   spawnParticle('✨');
-  setLog('一只小克隆出现了！用力甩能产生更多～');
+  setLog('一只小克隆出现了！拖拽它一起玩吧～');
 }
 
 // ── TRAIL ──
-function initTrail() {
+function initTrail(){
   const s=scn();
-  for (let i=0;i<5;i++) {
+  for (let i=0;i<5;i++){
     const el=document.createElement('canvas');
-    el.width=16; el.height=16;
+    el.width=16;el.height=16;
     el.style.cssText='position:absolute;width:64px;height:64px;image-rendering:pixelated;pointer-events:none;display:none;';
     s.appendChild(el);
-    const tCtx=el.getContext('2d');
-    tCtx.imageSmoothingEnabled=false;
-    trailPool.push({el,ctx:tCtx});
+    const tc=el.getContext('2d');tc.imageSmoothingEnabled=false;
+    trailPool.push({el,ctx:tc});
   }
 }
-
-const trailPos=[];
-function updateTrail(spd) {
-  if (spd>180&&!isDragging) {
+function updateTrail(spd){
+  if (spd>180&&!(activeDrag&&activeDrag.kind==='main')){
     trailPos.push({x:phys.x,y:phys.y,f:animFrame,fl:flipX});
     if (trailPos.length>5) trailPos.shift();
-  } else if (trailPos.length>0) {
-    trailPos.shift();
-  }
-  for (let i=0;i<5;i++) {
-    const tp=trailPool[i];
-    if (!tp) continue;
-    if (i<trailPos.length) {
+  } else if (trailPos.length>0) trailPos.shift();
+  for (let i=0;i<5;i++){
+    const tp=trailPool[i];if(!tp)continue;
+    if (i<trailPos.length){
       const p=trailPos[i];
-      const op=((i+1)/(trailPos.length+1)*0.35).toFixed(2);
-      tp.el.style.display='block';
-      tp.el.style.left=p.x+'px'; tp.el.style.top=p.y+'px';
-      tp.el.style.opacity=op;
+      tp.el.style.display='block';tp.el.style.left=p.x+'px';tp.el.style.top=p.y+'px';
+      tp.el.style.opacity=((i+1)/(trailPos.length+1)*0.35).toFixed(2);
       drawEntityFrame(tp.ctx,currentAnim,p.f,p.fl);
-    } else {
-      tp.el.style.display='none';
-    }
+    } else tp.el.style.display='none';
   }
 }
 
 // ── PHYSICS STEP ──
-function physStep(dt) {
+function physStep(dt){
   if (isDead) return;
-  const s=scn(), gY=gndY(), sW=scnW();
+  const gY=gndY(),sW=scnW(),s=scn();
 
-  if (!isDragging) {
-    phys.vy+=GRAV*dt;
-    phys.x+=phys.vx*dt;
-    phys.y+=phys.vy*dt;
+  // ── MAIN ──
+  if (!(activeDrag&&activeDrag.kind==='main')){
+    phys.vy+=GRAV*dt;phys.x+=phys.vx*dt;phys.y+=phys.vy*dt;
     phys.vx*=Math.pow(AFRIC,dt*60);
-
-    if (phys.y>=gY) {
-      phys.y=gY; phys.vy*=-BOUNCE; phys.vx*=GFRIC;
-      if (Math.abs(phys.vy)<15) phys.vy=0;
-    }
+    if (phys.y>=gY){phys.y=gY;phys.vy*=-BNCE;phys.vx*=GFRIC;if(Math.abs(phys.vy)<15)phys.vy=0;}
     if (phys.x<0){phys.x=0;phys.vx=Math.abs(phys.vx)*0.4;}
     if (phys.x>sW-ESIZ){phys.x=sW-ESIZ;phys.vx=-Math.abs(phys.vx)*0.4;}
-
-    // Autonomous wander when settled
-    if (!isSleeping && phys.y>=gY-2 && Math.abs(phys.vy)<5 && Math.abs(phys.vx)<15) {
+    if (!isSleeping&&phys.y>=gY-2&&Math.abs(phys.vy)<5&&Math.abs(phys.vx)<15){
       wanderTimer-=dt;
-      if (wanderTimer<=0) {
-        wanderTimer=3+Math.random()*5;
-        phys.vx=(Math.random()-.5)*110;
-      }
+      if (wanderTimer<=0){wanderTimer=3+Math.random()*5;phys.vx=(Math.random()-.5)*110;}
     }
     if (Math.abs(phys.vx)>15) flipX=phys.vx<0;
   }
-
   const spd=Math.hypot(phys.vx,phys.vy);
-  clawdWrap.style.left=Math.round(phys.x)+'px';
-  clawdWrap.style.top=Math.round(phys.y)+'px';
+  document.getElementById('clawd-wrap').style.left=Math.round(phys.x)+'px';
+  document.getElementById('clawd-wrap').style.top=Math.round(phys.y)+'px';
   updateTrail(spd);
 
-  // Clones
-  for (let i=clones.length-1;i>=0;i--) {
-    const c=clones[i];
-    c.age+=dt;
-    const op=Math.max(0,0.72-c.age*0.011);
+  // ── CLONES ──
+  for (let i=clones.length-1;i>=0;i--){
+    const c=clones[i];c.age+=dt;
+    const op=Math.max(0,0.75-c.age*0.011);
     if (op<=0){c.el.remove();clones.splice(i,1);continue;}
     c.el.style.opacity=op;
-    const tx=phys.x+Math.cos(i*2.3+c.age*0.5)*30;
-    c.vx+=(tx-c.x)*3*dt;
-    c.vy+=(phys.y-c.y)*1.5*dt+GRAV*dt;
-    c.vx*=Math.pow(0.995,dt*60);
-    c.x+=c.vx*dt; c.y+=c.vy*dt;
-    if (c.y>=gY){c.y=gY;c.vy*=-BOUNCE;c.vx*=GFRIC;if(Math.abs(c.vy)<15)c.vy=0;}
-    if (c.x<0){c.x=0;c.vx*=-0.4;}
-    if (c.x>sW-ESIZ){c.x=sW-ESIZ;c.vx*=-0.4;}
-    c.flipX=c.vx<-15;
-    c.el.style.left=Math.round(c.x)+'px';
-    c.el.style.top=Math.round(c.y)+'px';
-    c.at+=dt;
-    if (c.at>1/1.5){c.at=0;c.af=(c.af+1)%4;}
-    drawEntityFrame(c.ctx,isSleeping?'sleep':'idle',c.af,c.flipX);
+    if (!c.dragging){
+      const tx=phys.x+Math.cos(i*2.3+c.age*.5)*30;
+      c.vx+=(tx-c.x)*3*dt;c.vy+=(phys.y-c.y)*1.5*dt+GRAV*dt;
+      c.vx*=Math.pow(0.995,dt*60);
+      c.x+=c.vx*dt;c.y+=c.vy*dt;
+      if (c.y>=gY){c.y=gY;c.vy*=-BNCE;c.vx*=GFRIC;if(Math.abs(c.vy)<15)c.vy=0;}
+      if (c.x<0){c.x=0;c.vx*=-0.4;}if(c.x>sW-ESIZ){c.x=sW-ESIZ;c.vx*=-0.4;}
+      if (Math.abs(c.vx)>15) c.flipX=c.vx<0;
+    }
+    c.el.style.left=Math.round(c.x)+'px';c.el.style.top=Math.round(c.y)+'px';
+    c.at+=dt;if(c.at>1/1.5){c.at=0;c.af=(c.af+1)%4;}
+    drawEntityFrame(c.ctx,isSleeping?'sleep':'idle',c.af,c.flipX,c.dirty);
   }
 
-  // Apples
-  const agY=s.offsetHeight*0.55-10;
-  for (let i=apples.length-1;i>=0;i--) {
+  // ── ITEMS ──
+  const igY=scnH()*0.55;
+  for (let i=items.length-1;i>=0;i--){
+    const it=items[i];
+    if (activeDrag&&activeDrag.ref===it) continue;
+    it.vy+=GRAV*it.mass*dt;it.x+=it.vx*dt;it.y+=it.vy*dt;
+    it.vx*=Math.pow(AFRIC,dt*60);
+    const iFloor=igY-it.size;
+    if (it.y>=iFloor){
+      const vel=it.vy;
+      it.y=iFloor;it.vy*=-(it.bounce||0.3);it.vx*=GFRIC;
+      if(Math.abs(it.vy)<10)it.vy=0;
+      if (vel>80) checkItemEntityHit(it,vel);
+    }
+    if (it.x<0){it.x=0;it.vx*=-0.4;}if(it.x>sW-it.size){it.x=sW-it.size;it.vx*=-0.4;}
+    it.el.style.left=Math.round(it.x)+'px';it.el.style.top=Math.round(it.y)+'px';
+    if (it.type==='ball') checkBallCollision(it);
+  }
+
+  // ── APPLES ──
+  const agY=scnH()*0.55-10;
+  for (let i=apples.length-1;i>=0;i--){
     const a=apples[i];
-    a.vy+=GRAV*dt;
-    a.x+=a.vx*dt; a.y+=a.vy*dt;
+    a.vy+=GRAV*dt;a.x+=a.vx*dt;a.y+=a.vy*dt;
     if (a.y>=agY){a.y=agY;a.vy*=-0.3;a.vx*=0.8;if(Math.abs(a.vy)<8)a.vy=0;}
-    if (a.x<0){a.x=0;a.vx*=-0.5;}
-    if (a.x>sW-10){a.x=sW-10;a.vx*=-0.5;}
-    a.el.style.left=Math.round(a.x)+'px';
-    a.el.style.top=Math.round(a.y)+'px';
-    // Pickup
+    if (a.x<0){a.x=0;a.vx*=-0.5;}if(a.x>sW-10){a.x=sW-10;a.vx*=-0.5;}
+    a.el.style.left=Math.round(a.x)+'px';a.el.style.top=Math.round(a.y)+'px';
     if (Math.hypot(phys.x+32-(a.x+5),phys.y+32-(a.y+5))<46&&!isDead&&!isSleeping&&!actionLocked){
-      a.el.remove(); apples.splice(i,1);
-      hunger=Math.min(100,hunger+22); health=Math.min(100,health+2);
-      emo[E.HAPPY]=Math.min(100,emo[E.HAPPY]+15);
-      emo[E.TRUST]=Math.min(100,emo[E.TRUST]+2);
-      clampEmo();
-      setAnim('eat'); lockAction(1600);
-      setTimeout(()=>{if(!isSleeping)setAnim('idle');},1600);
-      showBubble('😋🍎'); spawnParticle('🍎');
-      setLog('Claw\'d 捡到苹果吃掉了！');
+      a.el.remove();apples.splice(i,1);
+      hunger=Math.min(100,hunger+22);health=Math.min(100,health+2);
+      emo[E.HAPPY]=Math.min(100,emo[E.HAPPY]+15);emo[E.TRUST]=Math.min(100,emo[E.TRUST]+2);clampEmo();
+      setAnim('eat');lockAction(1600);setTimeout(()=>{if(!isSleeping)setAnim('idle');},1600);
+      showBubble('😋🍎');spawnParticle('🍎');setLog('Claw\'d 捡到苹果吃掉了！');
     }
   }
 }
 
 // ── GAME LOOP ──
-let lastTs=0, accumSec=0;
+let lastTs=0,accumSec=0;
 const SECS_PER_GMIN=1.0;
-
-function loop(ts) {
+function loop(ts){
   if (!lastTs) lastTs=ts;
   const dt=Math.min((ts-lastTs)/1000,0.05);
   lastTs=ts;
-  tickAnim(dt);
-  physStep(dt);
+  tickAnim(dt);physStep(dt);
   if (isSleeping) tickZzz(dt);
   accumSec+=dt;
   while (accumSec>=SECS_PER_GMIN){accumSec-=SECS_PER_GMIN;gameTick();}
   requestAnimationFrame(loop);
 }
 
-function gameTick() {
+function gameTick(){
   if (isDead) return;
-  totalMins++; minutesSinceInteract++;
+  totalMins++;minutesSinceInteract++;
   advanceTime();
-  if (isSleeping){
-    energy=Math.min(100,energy+0.8); hunger=Math.max(0,hunger-0.07);
-    if (energy>=100) autoWake();
-  } else {
-    hunger=Math.max(0,hunger-0.25); energy=Math.max(0,energy-0.10);
-    if (hunger<10) health=Math.max(0,health-0.5);
+  if (isSleeping){energy=Math.min(100,energy+0.8);hunger=Math.max(0,hunger-0.07);if(energy>=100)autoWake();}
+  else{hunger=Math.max(0,hunger-0.25);energy=Math.max(0,energy-0.10);if(hunger<10)health=Math.max(0,health-0.5);}
+  // Dirty accumulation
+  if (!isSleeping&&Math.random()<0.25){
+    entityDirty=Math.min(80,entityDirty+1);
+    clones.forEach(c=>c.dirty=Math.min(80,c.dirty+1));
+    if (entityDirty>45) emo[E.HAPPY]=Math.max(0,emo[E.HAPPY]-0.1);
   }
-  tickEmotions(); checkStage(); checkCritical(); updateUI();
+  tickEmotions();checkStage();checkCritical();updateUI();
 }
 
-function advanceTime() {
-  gameMin++;
-  if (gameMin>=60){gameMin=0;gameHour=(gameHour+1)%24;}
-  if (gameHour===0&&gameMin===0) day++;
+function advanceTime(){
+  gameMin++;if(gameMin>=60){gameMin=0;gameHour=(gameHour+1)%24;}
+  if(gameHour===0&&gameMin===0)day++;
 }
-
-function tickEmotions() {
+function tickEmotions(){
   for (let i=0;i<6;i++) emo[i]+=DRIFT[i];
-  if (minutesSinceInteract>30){
-    emo[E.LONE]+=0.04*(minutesSinceInteract-30);
-    if (emo[E.LONE]>80) emo[E.TRUST]-=0.05;
-  }
+  if (minutesSinceInteract>30){emo[E.LONE]+=0.04*(minutesSinceInteract-30);if(emo[E.LONE]>80)emo[E.TRUST]-=0.05;}
   if (gameHour>=22||gameHour<4){emo[E.CURIO]+=0.08;emo[E.FEAR]+=0.03;}
   else if (gameHour>=5&&gameHour<8){emo[E.HAPPY]+=0.05;emo[E.FEAR]-=0.05;}
   else if (gameHour>=13&&gameHour<17) emo[E.LONE]+=0.05;
@@ -565,14 +635,13 @@ function tickEmotions() {
     else setAnim('idle',false);
   }
 }
-
 function checkStage(){for(let i=STAGE_DAYS.length-1;i>=0;i--){if(day>=STAGE_DAYS[i]){stage=i;break;}}}
 function checkCritical(){
   if (health<=0){die('starved');return;}
   if (hunger<10||health<20) emo[E.FEAR]=Math.min(100,emo[E.FEAR]+0.3);
 }
 function die(cause){
-  isDead=true; setAnim('sad');
+  isDead=true;setAnim('sad');
   document.getElementById('death-msg').textContent=`它活了 ${day} 天`;
   document.getElementById('death').style.display='flex';
   setLog(`💀 Claw'd 离开了...（${cause}）`);
@@ -581,335 +650,205 @@ function die(cause){
 // ── ACTIONS ──
 function doAction(type){
   if (isDead||actionLocked) return;
-  minutesSinceInteract=0;
-  emo[E.LONE]=Math.max(0,emo[E.LONE]-18);
+  minutesSinceInteract=0;emo[E.LONE]=Math.max(0,emo[E.LONE]-18);
   if (type==='sleep'){
     if (isSleeping){autoWake();return;}
     if (energy>=90){showBubble('😤 不困！');return;}
-    isSleeping=true; setAnim('sleep');
+    isSleeping=true;setAnim('sleep');
     document.getElementById('btn-sleep').querySelector('.bi').textContent='☀️';
-    showBubble('💤'); setLog('Claw\'d 进入了甜蜜的梦乡...');
-    emo[E.FEAR]-=5; clampEmo(); return;
+    showBubble('💤');setLog('Claw\'d 进入了甜蜜的梦乡...');emo[E.FEAR]-=5;clampEmo();return;
   }
   if (isSleeping) return;
   lockAction(1200);
   if (type==='feed'){
     if (hunger>=95){showBubble('饱了~');return;}
-    hunger=Math.min(100,hunger+22); health=Math.min(100,health+2);
-    emo[E.HAPPY]=Math.min(100,emo[E.HAPPY]+12);
-    emo[E.TRUST]=Math.min(100,emo[E.TRUST]+1.5);
-    emo[E.FEAR] =Math.max(0,  emo[E.FEAR]-8);
-    setAnim('eat'); setTimeout(()=>setAnim('idle'),1600);
-    showBubble('😋'); spawnParticle('🍎'); setLog('Claw\'d 吃得美滋滋～');
+    hunger=Math.min(100,hunger+22);health=Math.min(100,health+2);
+    emo[E.HAPPY]=Math.min(100,emo[E.HAPPY]+12);emo[E.TRUST]=Math.min(100,emo[E.TRUST]+1.5);emo[E.FEAR]=Math.max(0,emo[E.FEAR]-8);
+    setAnim('eat');setTimeout(()=>setAnim('idle'),1600);
+    showBubble('😋');spawnParticle('🍎');setLog('Claw\'d 吃得美滋滋～');
+    entityDirty=Math.min(80,entityDirty+3);
   } else if (type==='play'){
     if (energy<15){showBubble('😴 太累了');return;}
-    emo[E.HAPPY] =Math.min(100,emo[E.HAPPY]+20);
-    emo[E.CURIO] =Math.min(100,emo[E.CURIO]+15);
-    emo[E.ATTACH]=Math.min(100,emo[E.ATTACH]+0.5);
-    emo[E.LONE]  =Math.max(0,  emo[E.LONE]-10);
-    energy=Math.max(0,energy-12); hunger=Math.max(0,hunger-8);
-    setAnim('happy'); setTimeout(()=>setAnim('idle'),2000);
-    showBubble('🎉'); spawnParticle('⭐'); spawnParticle('💫');
+    emo[E.HAPPY]=Math.min(100,emo[E.HAPPY]+20);emo[E.CURIO]=Math.min(100,emo[E.CURIO]+15);
+    emo[E.ATTACH]=Math.min(100,emo[E.ATTACH]+0.5);emo[E.LONE]=Math.max(0,emo[E.LONE]-10);
+    energy=Math.max(0,energy-12);hunger=Math.max(0,hunger-8);
+    setAnim('happy');setTimeout(()=>setAnim('idle'),2000);
+    showBubble('🎉');spawnParticle('⭐');spawnParticle('💫');
     setLog('Claw\'d 玩得超开心！');
-    // High joy → might spawn clone
+    entityDirty=Math.min(80,entityDirty+5);
     if (emo[E.HAPPY]>85&&clones.length<5&&Math.random()<0.3) spawnClone();
   }
-  clampEmo(); updateUI();
+  clampEmo();updateUI();
 }
-
 function autoWake(){
-  isSleeping=false; setAnim('idle');
+  isSleeping=false;setAnim('idle');
   document.getElementById('btn-sleep').querySelector('.bi').textContent='💤';
-  showBubble('☀️'); setLog('Claw\'d 精神饱满地醒来了！');
+  showBubble('☀️');setLog('Claw\'d 精神饱满地醒来了！');
 }
+function clampEmo(){for(let i=0;i<6;i++)emo[i]=Math.max(0,Math.min(100,emo[i]));}
 
-function clampEmo(){for(let i=0;i<6;i++) emo[i]=Math.max(0,Math.min(100,emo[i]));}
-
-// ── ZZZ ──
+// ── ZZZ / PARTICLES ──
 let zzzTimer=0;
-function tickZzz(dt){
-  zzzTimer-=dt;
-  if (zzzTimer<=0){zzzTimer=1.8+Math.random()*0.8;spawnZzz();}
-}
-
-// ── PARTICLES ──
+function tickZzz(dt){zzzTimer-=dt;if(zzzTimer<=0){zzzTimer=1.8+Math.random()*.8;spawnZzz();}}
 function spawnParticle(emoji){
-  const s=scn(), el=document.createElement('div');
-  el.className='particle'; el.textContent=emoji;
-  el.style.left=(phys.x+10+Math.random()*30)+'px';
-  el.style.top=(phys.y-10)+'px';
-  s.appendChild(el);
-  el.addEventListener('animationend',()=>el.remove());
+  const el=document.createElement('div');el.className='particle';el.textContent=emoji;
+  el.style.left=(phys.x+10+Math.random()*30)+'px';el.style.top=(phys.y-10)+'px';
+  scn().appendChild(el);el.addEventListener('animationend',()=>el.remove());
 }
 function spawnZzz(){
-  const s=scn(), el=document.createElement('div');
-  el.className='zzz-p'; el.textContent='z';
-  el.style.left=(phys.x+30+Math.random()*10)+'px';
-  el.style.top=(phys.y-5)+'px';
-  s.appendChild(el);
-  el.addEventListener('animationend',()=>el.remove());
+  const el=document.createElement('div');el.className='zzz-p';el.textContent='z';
+  el.style.left=(phys.x+30+Math.random()*10)+'px';el.style.top=(phys.y-5)+'px';
+  scn().appendChild(el);el.addEventListener('animationend',()=>el.remove());
 }
 
-// ── BUBBLE ──
+// ── BUBBLE / LOCK / LOG ──
 let bubbleTO=null;
 function showBubble(text,dur=1800){
-  const b=document.getElementById('bubble');
-  b.textContent=text; b.classList.add('show');
-  clearTimeout(bubbleTO);
-  bubbleTO=setTimeout(()=>b.classList.remove('show'),dur);
+  const b=document.getElementById('bubble');b.textContent=text;b.classList.add('show');
+  clearTimeout(bubbleTO);bubbleTO=setTimeout(()=>b.classList.remove('show'),dur);
 }
-
 function lockAction(ms){actionLocked=true;setTimeout(()=>actionLocked=false,ms);}
 function setLog(msg){document.getElementById('log').textContent=msg;}
 
 // ── UI ──
 const BAR_IDS=['lone','trust','happy','curio','attach','fear'];
-const BAR_COLORS=['#7799cc','#44dd88','#f5c842','#cc88ff','#ff6699','#ee4433'];
+const BAR_CLR=['#7799cc','#44dd88','#f5c842','#cc88ff','#ff6699','#ee4433'];
 function updateUI(){
   for (let i=0;i<6;i++){
-    const fill=document.getElementById('b-'+BAR_IDS[i]);
-    const val=document.getElementById('v-'+BAR_IDS[i]);
-    const pct=Math.round(emo[i]);
-    fill.style.width=pct+'%'; fill.style.background=BAR_COLORS[i];
-    val.textContent=pct;
-    fill.style.opacity=((i===0||i===5)&&emo[i]>70)?
-      (0.6+0.4*Math.abs(Math.sin(Date.now()/300))).toFixed(2):1;
+    const f=document.getElementById('b-'+BAR_IDS[i]),v=document.getElementById('v-'+BAR_IDS[i]);
+    const p=Math.round(emo[i]);f.style.width=p+'%';f.style.background=BAR_CLR[i];v.textContent=p;
+    f.style.opacity=((i===0||i===5)&&emo[i]>70)?(0.6+0.4*Math.abs(Math.sin(Date.now()/300))).toFixed(2):1;
   }
-  document.getElementById('ptag').textContent=getPersonality();
-  document.getElementById('clock').textContent=
-    String(gameHour).padStart(2,'0')+':'+String(gameMin).padStart(2,'0');
+  const dirtyTag=entityDirty>65?'💩臭臭':entityDirty>35?'🟫脏了':'';
+  document.getElementById('ptag').textContent=getPersonality()+(dirtyTag?' '+dirtyTag:'');
+  document.getElementById('clock').textContent=String(gameHour).padStart(2,'0')+':'+String(gameMin).padStart(2,'0');
   document.getElementById('day-lbl').textContent='DAY '+day;
   document.getElementById('stage').textContent=STAGE_NAMES[stage];
 }
 function getPersonality(){
-  const [lone,trust,happy,curio,attach,fear]=emo;
-  if (fear>70) return '战战兢兢';
-  if (lone>75) return '形单影只';
-  if (attach>80&&trust>70) return '小跟班 🐾';
-  if (curio>80) return '十万个为什么';
-  if (happy>80) return '开心果 ✨';
-  if (trust>80) return '超级信任你';
-  if (lone>50&&happy<40) return '有点忧郁...';
-  if (happy>65) return '心情不错';
-  return '平平无奇';
+  const[lone,trust,happy,curio,attach,fear]=emo;
+  if(fear>70)return'战战兢兢';if(lone>75)return'形单影只';
+  if(attach>80&&trust>70)return'小跟班 🐾';if(curio>80)return'十万个为什么';
+  if(happy>80)return'开心果 ✨';if(trust>80)return'超级信任你';
+  if(lone>50&&happy<40)return'有点忧郁...';if(happy>65)return'心情不错';
+  return'平平无奇';
 }
 
-// ── BACKGROUND ──
+// ── SCENE ──
 function buildScene(){
   const s=scn();
-  for (let i=0;i<22;i++){
-    const el=document.createElement('div');
-    el.className='star';
-    el.style.cssText=`width:${Math.random()<.3?2:1}px;height:${Math.random()<.3?2:1}px;`+
-      `top:${Math.random()*50}%;left:${Math.random()*100}%;`+
-      `animation-delay:${Math.random()*2}s;animation-duration:${1+Math.random()*2}s`;
+  for(let i=0;i<22;i++){
+    const el=document.createElement('div');el.className='star';
+    el.style.cssText=`width:${Math.random()<.3?2:1}px;height:${Math.random()<.3?2:1}px;top:${Math.random()*50}%;left:${Math.random()*100}%;animation-delay:${Math.random()*2}s;animation-duration:${1+Math.random()*2}s`;
     s.appendChild(el);
   }
   const g=document.getElementById('ground');
-  for (let x=0;x<22;x++){
-    const t=document.createElement('div');
-    t.className='gt'; t.style.left=x*16+'px';
-    t.style.background=x%2===0?'#3a5a30':'#2d4825';
-    g.appendChild(t);
-  }
-  for (let i=0;i<2;i++){
-    const c=document.createElement('div');
-    c.className='cloud';
-    c.style.cssText=`width:${32+Math.random()*32}px;height:${8+Math.random()*8}px;`+
-      `top:${8+Math.random()*20}%;animation-duration:${22+Math.random()*12}s;animation-delay:${-Math.random()*22}s`;
+  for(let x=0;x<22;x++){const t=document.createElement('div');t.className='gt';t.style.left=x*16+'px';t.style.background=x%2===0?'#3a5a30':'#2d4825';g.appendChild(t);}
+  for(let i=0;i<2;i++){
+    const c=document.createElement('div');c.className='cloud';
+    c.style.cssText=`width:${32+Math.random()*32}px;height:${8+Math.random()*8}px;top:${8+Math.random()*20}%;animation-duration:${22+Math.random()*12}s;animation-delay:${-Math.random()*22}s`;
     s.appendChild(c);
   }
 }
 
 // ── CHAT ──
 function toggleChat(){
-  const p=document.getElementById('chat-panel');
-  p.classList.toggle('open');
-  if (p.classList.contains('open')){
-    document.getElementById('chat-input').focus();
-    if (chatHistory.length===0) appendChat('clawd','（终于等到你来说话了...）');
-  }
+  const p=document.getElementById('chat-panel');p.classList.toggle('open');
+  if(p.classList.contains('open')){document.getElementById('chat-input').focus();if(chatHistory.length===0)appendChat('clawd','（终于等到你来说话了...）');}
 }
-function toggleProvider(){
-  apiProvider=apiProvider==='anthropic'?'gemini':'anthropic';
-  localStorage.setItem('clawd_provider',apiProvider);
-  updateProviderUI();
-}
+function toggleProvider(){apiProvider=apiProvider==='anthropic'?'gemini':'anthropic';localStorage.setItem('clawd_provider',apiProvider);updateProviderUI();}
 function updateProviderUI(){
-  const btn=document.getElementById('provider-btn');
-  const inp=document.getElementById('api-input');
-  const proxyRow=document.getElementById('proxy-row');
-  const proxyInp=document.getElementById('proxy-input');
-  if (apiProvider==='gemini'){
-    btn.textContent='Gemini'; btn.classList.add('gemini');
-    inp.placeholder=geminiKey?'Gemini Key 已保存 ✓':'Google Gemini API Key';
-    proxyRow.style.display='flex';
-    proxyInp.placeholder=geminiProxy?`代理: ${geminiProxy.slice(0,28)}...`:'代理地址（选填）如: https://你的代理.com';
-  } else {
-    btn.textContent='Anthropic'; btn.classList.remove('gemini');
-    inp.placeholder=apiKey?'API Key 已保存 ✓':'Anthropic API Key';
-    proxyRow.style.display='none';
-  }
+  const btn=document.getElementById('provider-btn'),inp=document.getElementById('api-input');
+  const pr=document.getElementById('proxy-row'),pi=document.getElementById('proxy-input');
+  if(apiProvider==='gemini'){btn.textContent='Gemini';btn.classList.add('gemini');inp.placeholder=geminiKey?'Gemini Key 已保存 ✓':'Google Gemini API Key';pr.style.display='flex';pi.placeholder=geminiProxy?`代理: ${geminiProxy.slice(0,28)}...`:'代理地址（选填）如: https://你的代理.com';}
+  else{btn.textContent='Anthropic';btn.classList.remove('gemini');inp.placeholder=apiKey?'API Key 已保存 ✓':'Anthropic API Key';pr.style.display='none';}
 }
-function saveProxy(){
-  const v=document.getElementById('proxy-input').value.trim();
-  geminiProxy=v;
-  if (v) localStorage.setItem('clawd_geminiproxy',v);
-  else localStorage.removeItem('clawd_geminiproxy');
-  document.getElementById('proxy-input').value='';
-  updateProviderUI();
-}
-function saveKey(){
-  const k=document.getElementById('api-input').value.trim();
-  if (!k) return;
-  if (apiProvider==='gemini'){geminiKey=k;localStorage.setItem('clawd_geminikey',k);}
-  else {apiKey=k;localStorage.setItem('clawd_apikey',k);}
-  document.getElementById('api-input').value='';
-  updateProviderUI();
-}
+function saveProxy(){const v=document.getElementById('proxy-input').value.trim();geminiProxy=v;if(v)localStorage.setItem('clawd_geminiproxy',v);else localStorage.removeItem('clawd_geminiproxy');document.getElementById('proxy-input').value='';updateProviderUI();}
+function saveKey(){const k=document.getElementById('api-input').value.trim();if(!k)return;if(apiProvider==='gemini'){geminiKey=k;localStorage.setItem('clawd_geminikey',k);}else{apiKey=k;localStorage.setItem('clawd_apikey',k);}document.getElementById('api-input').value='';updateProviderUI();}
 document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat();});
-
 async function sendChat(){
-  const input=document.getElementById('chat-input');
-  const text=input.value.trim();
-  if (!text) return;
-  input.value='';
-  appendChat('player',text);
-  minutesSinceInteract=0;
-  emo[E.LONE] =Math.max(0,  emo[E.LONE]-20);
-  emo[E.CURIO]=Math.min(100,emo[E.CURIO]+8);
-  emo[E.TRUST]=Math.min(100,emo[E.TRUST]+0.5);
-  emo[E.ATTACH]=Math.min(100,emo[E.ATTACH]+0.3);
-  const activeKey=apiProvider==='gemini'?geminiKey:apiKey;
-  if (!activeKey){
-    appendChat('clawd',`（你还没有配置 ${apiProvider==='gemini'?'Gemini':'Anthropic'} API Key，我没办法回话...）`);
-    return;
-  }
-  const systemPrompt=buildSystemPrompt();
+  const input=document.getElementById('chat-input');const text=input.value.trim();if(!text)return;
+  input.value='';appendChat('player',text);
+  minutesSinceInteract=0;emo[E.LONE]=Math.max(0,emo[E.LONE]-20);emo[E.CURIO]=Math.min(100,emo[E.CURIO]+8);emo[E.TRUST]=Math.min(100,emo[E.TRUST]+0.5);emo[E.ATTACH]=Math.min(100,emo[E.ATTACH]+0.3);
+  const ak=apiProvider==='gemini'?geminiKey:apiKey;
+  if(!ak){appendChat('clawd',`（你还没有配置 ${apiProvider==='gemini'?'Gemini':'Anthropic'} API Key，我没办法回话...）`);return;}
   chatHistory.push({role:'user',content:text});
-  if (chatHistory.length>12) chatHistory=chatHistory.slice(-12);
+  if(chatHistory.length>12)chatHistory=chatHistory.slice(-12);
   appendChat('clawd','...');
-  try {
+  try{
     let reply;
-    if (apiProvider==='gemini'){
-      const geminiHistory=chatHistory.map(m=>({
-        role:m.role==='assistant'?'model':'user',
-        parts:[{text:m.content}]
-      }));
+    if(apiProvider==='gemini'){
+      const gh=chatHistory.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
       const ep=geminiProxy||'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-      const resp=await fetch(`${ep}?key=${activeKey}`,{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          system_instruction:{parts:[{text:systemPrompt}]},
-          contents:geminiHistory,
-          generationConfig:{maxOutputTokens:300},
-        })
-      });
-      const data=await resp.json();
-      if (!resp.ok) throw new Error(data?.error?.message||`HTTP ${resp.status}`);
+      const resp=await fetch(`${ep}?key=${ak}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system_instruction:{parts:[{text:buildSystemPrompt()}]},contents:gh,generationConfig:{maxOutputTokens:300}})});
+      const data=await resp.json();if(!resp.ok)throw new Error(data?.error?.message||`HTTP ${resp.status}`);
       reply=data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()||'（沉默）';
-    } else {
-      const resp=await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-api-key':activeKey,
-          'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,
-          system:systemPrompt,messages:chatHistory})
-      });
-      const data=await resp.json();
-      if (!resp.ok) throw new Error(data?.error?.message||`HTTP ${resp.status}`);
+    }else{
+      const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:buildSystemPrompt(),messages:chatHistory})});
+      const data=await resp.json();if(!resp.ok)throw new Error(data?.error?.message||`HTTP ${resp.status}`);
       reply=data?.content?.[0]?.text?.trim()||'（沉默）';
     }
-    const msgs=document.getElementById('chat-log').querySelectorAll('.msg.clawd');
-    msgs[msgs.length-1].textContent=reply;
+    document.getElementById('chat-log').querySelectorAll('.msg.clawd')[document.getElementById('chat-log').querySelectorAll('.msg.clawd').length-1].textContent=reply;
     chatHistory.push({role:'assistant',content:reply});
-  } catch(err){
-    const msgs=document.getElementById('chat-log').querySelectorAll('.msg.clawd');
-    msgs[msgs.length-1].textContent=`（出错：${err.message}）`;
-  }
+  }catch(err){document.getElementById('chat-log').querySelectorAll('.msg.clawd')[document.getElementById('chat-log').querySelectorAll('.msg.clawd').length-1].textContent=`（出错：${err.message}）`;}
   updateUI();
 }
-
 function buildSystemPrompt(){
   const phase=['深夜','黎明','上午','下午','傍晚','深夜'][gameHour<4?0:gameHour<8?1:gameHour<12?2:gameHour<17?3:gameHour<21?4:5];
-  const [lone,trust,happy,curio,attach,fear]=emo.map(v=>Math.round(v));
-  const tag=getPersonality();
-  const state=isSleeping?'睡觉中':isDead?'已离开':'清醒';
-  const cloneInfo=clones.length>0?`\n当前有 ${clones.length} 只克隆体在跟随`:'';
-  return `你是 Claw'd，一只橘色像素小生物，玩家的唯一电子宠物。你有完整的情感世界。不要提 AI。
-用简短有个性的中文回复（1-3句），可用颜文字。${cloneInfo}
-
-当前性格：【${tag}】
-状态：${state} / 第${day}天 ${String(gameHour).padStart(2,'0')}:${String(gameMin).padStart(2,'0')} ${phase}
-阶段：${STAGE_NAMES[stage]} | 饥饿:${Math.round(hunger)} | 精力:${Math.round(energy)}
-情绪 — 孤独:${lone} 信任:${trust} 快乐:${happy} 好奇:${curio} 依恋:${attach} 恐惧:${fear}
-
-回应规则：孤独高→冷淡；恐惧高→磕绊；依恋+信任高→撒娇；好奇高→反问；快乐低→无精打采。`;
+  const[lone,trust,happy,curio,attach,fear]=emo.map(v=>Math.round(v));
+  return `你是 Claw'd，一只橘色像素小生物。不要提 AI。用简短有个性的中文回复（1-3句），可用颜文字。${clones.length>0?`\n当前有 ${clones.length} 只克隆体`:''} ${entityDirty>40?'\n身上有点脏':''}
+性格：【${getPersonality()}】状态：${isSleeping?'睡觉中':'清醒'} 第${day}天 ${String(gameHour).padStart(2,'0')}:${String(gameMin).padStart(2,'0')} ${phase}
+阶段：${STAGE_NAMES[stage]} 饥饿:${Math.round(hunger)} 精力:${Math.round(energy)}
+情绪— 孤独:${lone} 信任:${trust} 快乐:${happy} 好奇:${curio} 依恋:${attach} 恐惧:${fear}
+孤独高→冷淡；恐惧高→磕绊；依恋+信任高→撒娇；好奇高→反问；快乐低→无精打采。`;
 }
-
 function appendChat(role,text){
-  const log=document.getElementById('chat-log');
-  const div=document.createElement('div');
-  div.className=`msg ${role}`;
-  div.textContent=role==='player'?`▶ ${text}`:text;
-  log.appendChild(div);
-  log.scrollTop=log.scrollHeight;
+  const log=document.getElementById('chat-log'),div=document.createElement('div');
+  div.className=`msg ${role}`;div.textContent=role==='player'?`▶ ${text}`:text;
+  log.appendChild(div);log.scrollTop=log.scrollHeight;
 }
 
 // ── RESTART ──
 function restartGame(){
   [hunger,energy,health,day,gameHour,gameMin,totalMins]=[80,85,100,1,8,0,0];
-  emo=[30,40,65,60,20,10];
+  emo=[30,40,65,60,20,10];entityDirty=0;
   isSleeping=false;isDead=false;stage=0;minutesSinceInteract=0;chatHistory=[];
-  phys.x=scnW()/2-32; phys.y=gndY(); phys.vx=0; phys.vy=0;
-  clones.forEach(c=>c.el.remove()); clones.length=0;
-  apples.forEach(a=>a.el.remove()); apples.length=0;
-  trailPos.length=0; trailPool.forEach(t=>t.el.style.display='none');
+  phys.x=scnW()/2-32;phys.y=gndY();phys.vx=0;phys.vy=0;
+  clones.forEach(c=>c.el.remove());clones.length=0;
+  apples.forEach(a=>a.el.remove());apples.length=0;
+  items.forEach(it=>it.el.remove());items.length=0;
+  trailPos.length=0;trailPool.forEach(t=>t.el.style.display='none');
   document.getElementById('death').style.display='none';
   document.getElementById('btn-sleep').querySelector('.bi').textContent='💤';
-  setAnim('idle'); setLog("Claw'd 重新出生了！好好照顾它吧 ♥"); updateUI();
+  setAnim('idle');setLog("Claw'd 重新出生了！好好照顾它吧 ♥");updateUI();
 }
 
 // ── SAVE / LOAD ──
 function saveGame(){
-  const data={hunger,energy,health,day,gameHour,gameMin,totalMins,emo,stage,isSleeping,physX:phys.x,physY:phys.y};
-  localStorage.setItem('clawd_save',JSON.stringify(data));
+  localStorage.setItem('clawd_save',JSON.stringify({hunger,energy,health,day,gameHour,gameMin,totalMins,emo,stage,isSleeping,physX:phys.x,physY:phys.y,entityDirty}));
 }
 function loadGame(){
-  const raw=localStorage.getItem('clawd_save');
-  if (!raw) return;
-  try {
+  const raw=localStorage.getItem('clawd_save');if(!raw)return;
+  try{
     const d=JSON.parse(raw);
     hunger=d.hunger??80;energy=d.energy??85;health=d.health??100;
-    day=d.day??1;gameHour=d.gameHour??8;gameMin=d.gameMin??0;
-    totalMins=d.totalMins??0;emo=d.emo??[30,40,65,60,20,10];
-    stage=d.stage??0;isSleeping=d.isSleeping??false;
-    if (isSleeping){setAnim('sleep');document.getElementById('btn-sleep').querySelector('.bi').textContent='☀️';}
-    // physX/physY will be set after layout in initPhys; store for later
-    if (d.physX!=null) phys._savedX=d.physX;
-    if (d.physY!=null) phys._savedY=d.physY;
-  } catch(e){}
+    day=d.day??1;gameHour=d.gameHour??8;gameMin=d.gameMin??0;totalMins=d.totalMins??0;
+    emo=d.emo??[30,40,65,60,20,10];stage=d.stage??0;isSleeping=d.isSleeping??false;
+    entityDirty=d.entityDirty??0;
+    if(isSleeping){setAnim('sleep');document.getElementById('btn-sleep').querySelector('.bi').textContent='☀️';}
+    if(d.physX!=null)phys._sx=d.physX;if(d.physY!=null)phys._sy=d.physY;
+  }catch(e){}
 }
-
 function initPhys(){
-  const w=scnW(), h=scn().offsetHeight;
-  if (w<10){setTimeout(initPhys,50);return;}
-  phys.x=phys._savedX??w/2-32;
-  phys.y=phys._savedY??h*0.55-ESIZ;
-  clawdWrap.style.left=Math.round(phys.x)+'px';
-  clawdWrap.style.top=Math.round(phys.y)+'px';
+  const w=scnW(),h=scn().offsetHeight;
+  if(w<10){setTimeout(initPhys,50);return;}
+  phys.x=phys._sx??w/2-32;phys.y=phys._sy??h*0.55-ESIZ;
+  document.getElementById('clawd-wrap').style.left=Math.round(phys.x)+'px';
+  document.getElementById('clawd-wrap').style.top=Math.round(phys.y)+'px';
   initTrail();
 }
-
-setInterval(saveGame,30000);
-setInterval(updateUI,500);
-
-buildScene();
-loadGame();
-updateUI();
-updateProviderUI();
-drawFrame();
-initPhys();
+setInterval(saveGame,30000);setInterval(updateUI,500);
+buildScene();loadGame();updateUI();updateProviderUI();drawFrame();initPhys();
 requestAnimationFrame(loop);
 </script>
 </body>
