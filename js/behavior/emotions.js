@@ -39,8 +39,24 @@ export function tickEmotions() {
   }
 }
 
+const STAGE_EMOJI = ['🥚','👶','🐣','🐥','🐈','🧓'];
+
 export function checkStage() {
+  let next = 0;
   for (let i=STAGE_DAYS.length-1; i>=0; i--) {
-    if (gs.day >= STAGE_DAYS[i]) { gs.stage = i; break; }
+    if (gs.day >= STAGE_DAYS[i]) { next = i; break; }
   }
+  if (next === gs.stage) return;
+  gs.stage = next;
+  // Announce and refresh visuals via dynamic import (avoids circular deps)
+  Promise.all([
+    import('../engine/renderer.js'),
+    import('../ui/feedback.js'),
+  ]).then(([rend, fb]) => {
+    rend.applyStageVisuals();
+    const emoji = STAGE_EMOJI[next] || '🐈';
+    fb.showBubble(`${emoji} ${STAGE_NAMES[next]}`);
+    fb.spawnParticle('✨'); fb.spawnParticle('🌟');
+    fb.setLog(`✨ 成长了！进入${STAGE_NAMES[next]}期！`);
+  });
 }

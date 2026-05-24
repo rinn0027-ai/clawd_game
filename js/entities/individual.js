@@ -3,6 +3,7 @@ import { ESIZ } from '../engine/constants.js';
 import { drawEntityFrame } from '../engine/renderer.js';
 import { showBubble, showEntityBubble, spawnParticle, setLog, scn } from '../ui/feedback.js';
 import { createCloneBody, cloneBodyMap, removeBody, mainBody, setMainBody, createMainBody } from '../engine/matter-world.js';
+import { applyStageVisuals } from '../engine/renderer.js';
 import { beginDrag } from './drag.js';
 
 export function setCloneAnim(c, name, ms=600) {
@@ -101,6 +102,7 @@ export function spawnIndividual() {
 
   el.addEventListener('pointerdown', e => beginDrag(e, 'clone', c));
   clones.push(c);
+  applyStageVisuals(); // match current growth stage
   spawnParticle('✨');
   setLog('✨ 一个新个体诞生了！');
 }

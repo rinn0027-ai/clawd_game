@@ -9,6 +9,7 @@ import {
   initWorld, createMainBody, setMainBody, mainBody,
   cloneBodyMap, itemBodyMap, appleBodyMap, removeBody, world,
 } from '../engine/matter-world.js';
+import { applyStageVisuals } from '../engine/renderer.js';
 
 export function saveGame() {
   localStorage.setItem('clawd_save', JSON.stringify({
@@ -55,6 +56,7 @@ export function initPhys() {
   const b = createMainBody(phys.x + 32, phys.y + 32);
   setMainBody(b);
   initTrail();
+  applyStageVisuals(); // set scale/filter for current stage
 }
 
 export function buildScene() {
@@ -78,7 +80,7 @@ export function buildScene() {
 }
 
 export function restartGame() {
-  gs.hunger=80; gs.energy=85; gs.health=100; gs.day=1;
+  gs.hunger=80; gs.energy=85; gs.health=100; gs.day=1; gs.stage=1;
   gs.gameHour=8; gs.gameMin=0; gs.totalMins=0;
   gs.emo=[30,40,65,60,20,10]; gs.entityDirty=0;
   clearTimeout(gs.rebirthTO); gs.rebirthTO=null;
@@ -100,6 +102,7 @@ export function restartGame() {
   const b = createMainBody(phys.x+32, phys.y+32);
   setMainBody(b);
 
+  applyStageVisuals();
   trailPos.length = 0; trailPool.forEach(t => t.el.style.display='none');
   document.getElementById('death').style.display = 'none';
   const wrap = document.getElementById('clawd-wrap');

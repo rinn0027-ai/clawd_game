@@ -6,6 +6,7 @@ import { clampEmo, autoWake } from './actions.js';
 import { updateUI } from '../ui/hud.js';
 import { spawnSoul } from '../entities/individual.js';
 import { createMainBody, setMainBody, mainBody, removeBody } from '../engine/matter-world.js';
+import { applyStageVisuals } from '../engine/renderer.js';
 
 export function advanceTime() {
   gs.gameMin++;
@@ -60,13 +61,14 @@ export function rebirthMain() {
   gs.isDead = false; gs.allDead = false;
   gs.hunger = 80; gs.energy = 85; gs.health = 100;
   gs.day = 0; gs.gameHour = 8; gs.gameMin = 0; gs.minutesSinceInteract = 0;
-  gs.emo = [30,40,65,60,20,10]; gs.entityDirty = 0; clampEmo();
+  gs.emo = [30,40,65,60,20,10]; gs.entityDirty = 0; gs.stage = 0; clampEmo();
   phys.x = scn().offsetWidth/2 - 32 + (Math.random()-.5)*80; phys.y = 0;
   phys.vx = 0; phys.vy = 0;
   // Recreate Matter body at new position with upward pop
   const b = createMainBody(phys.x+32, phys.y+32);
   window.Matter.Body.setVelocity(b, { x: (Math.random()-.5)*1.3, y: -2.5 });
   setMainBody(b);
+  applyStageVisuals(); // show egg form immediately
   const wrap = document.getElementById('clawd-wrap');
   wrap.style.display = ''; wrap.style.transform = ''; wrap.style.transition = '';
   document.getElementById('death').style.display = 'none';

@@ -29,7 +29,7 @@ export const gs = {
   isDead: false,
   allDead: false,
   deathCause: '',
-  stage: 0,
+  stage: 1, // start at baby (egg only reached via natural-death rebirth)
   minutesSinceInteract: 0,
   actionLocked: false,
   entityDirty: 0,
