@@ -5,6 +5,10 @@ import { setLog, scn } from './feedback.js';
 import { updateUI } from './hud.js';
 import { initTrail } from '../entities/individual.js';
 import { updateProviderUI } from './chat.js';
+import {
+  initWorld, createMainBody, setMainBody, mainBody,
+  cloneBodyMap, itemBodyMap, appleBodyMap, removeBody, world,
+} from '../engine/matter-world.js';
 
 export function saveGame() {
   localStorage.setItem('clawd_save', JSON.stringify({
@@ -46,6 +50,10 @@ export function initPhys() {
   phys.y = phys._sy ?? h*0.55 - ESIZ;
   document.getElementById('clawd-wrap').style.left = Math.round(phys.x)+'px';
   document.getElementById('clawd-wrap').style.top  = Math.round(phys.y)+'px';
+  // Initialise Matter.js world and create main character body
+  initWorld();
+  const b = createMainBody(phys.x + 32, phys.y + 32);
+  setMainBody(b);
   initTrail();
 }
 
@@ -76,15 +84,27 @@ export function restartGame() {
   clearTimeout(gs.rebirthTO); gs.rebirthTO=null;
   gs.isSleeping=false; gs.isDead=false; gs.allDead=false;
   gs.deathCause=''; gs.stage=0; gs.minutesSinceInteract=0; gs.chatHistory=[];
+
+  // Remove all dynamic Matter bodies
+  clones.forEach(c => { const b = cloneBodyMap.get(c); if (b) removeBody(b); cloneBodyMap.delete(c); c.el.remove(); });
+  clones.length = 0;
+  apples.forEach(a => { const b = appleBodyMap.get(a); if (b) removeBody(b); appleBodyMap.delete(a); a.el.remove(); });
+  apples.length = 0;
+  items.forEach(it => { const b = itemBodyMap.get(it); if (b) removeBody(b); itemBodyMap.delete(it); it.el.remove(); });
+  items.length = 0;
+
+  // Reset main entity position and recreate body
   const w = scn().offsetWidth;
-  phys.x = w/2-32; phys.y = scn().offsetHeight*0.55-ESIZ; phys.vx=0; phys.vy=0;
-  clones.forEach(c => c.el.remove()); clones.length=0;
-  apples.forEach(a => a.el.remove()); apples.length=0;
-  items.forEach(it=> it.el.remove()); items.length=0;
-  trailPos.length=0; trailPool.forEach(t => t.el.style.display='none');
-  document.getElementById('death').style.display='none';
+  phys.x = w/2 - 32; phys.y = scn().offsetHeight*0.55 - ESIZ;
+  phys.vx = 0; phys.vy = 0;
+  const b = createMainBody(phys.x+32, phys.y+32);
+  setMainBody(b);
+
+  trailPos.length = 0; trailPool.forEach(t => t.el.style.display='none');
+  document.getElementById('death').style.display = 'none';
   const wrap = document.getElementById('clawd-wrap');
   wrap.style.display=''; wrap.style.transform=''; wrap.style.transition='';
-  document.getElementById('btn-sleep').querySelector('.bi').textContent='💤';
+  wrap.style.left = Math.round(phys.x)+'px'; wrap.style.top = Math.round(phys.y)+'px';
+  document.getElementById('btn-sleep').querySelector('.bi').textContent = '💤';
   setAnim('idle'); setLog("Claw'd 重新出生了！好好照顾它吧 ♥"); updateUI();
 }

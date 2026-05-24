@@ -1,7 +1,8 @@
 import { gs, phys, clones, trailPool, trailPos } from '../state.js';
 import { ESIZ } from '../engine/constants.js';
-import { drawEntityFrame, ctx } from '../engine/renderer.js';
+import { drawEntityFrame } from '../engine/renderer.js';
 import { showBubble, showEntityBubble, spawnParticle, setLog, scn } from '../ui/feedback.js';
+import { createCloneBody, cloneBodyMap, removeBody, mainBody, setMainBody, createMainBody } from '../engine/matter-world.js';
 import { beginDrag } from './drag.js';
 
 export function setCloneAnim(c, name, ms=600) {
@@ -37,7 +38,10 @@ export function spawnBlood(cx, cy) {
 export function killEntity(isClone, cr, x, y) {
   spawnBlood(x+28, y+28);
   if (!isClone) {
+    if (gs.isDead) return;
     gs.isDead = true; gs.deathCause = '被大石头压扁';
+    // Remove main body from physics world immediately
+    if (mainBody) { removeBody(mainBody); setMainBody(null); }
     const wrap = document.getElementById('clawd-wrap');
     wrap.style.transition = 'transform 0.12s';
     wrap.style.transform  = 'scaleY(0.1) scaleX(2.2)';
@@ -48,13 +52,18 @@ export function killEntity(isClone, cr, x, y) {
       import('../behavior/lifecycle.js').then(m => m.checkAllDead());
     }, 500);
   } else {
+    if (!cr || cr.dead) return;
     cr.dead = true;
+    // Matter body already removed by physics.js collision handler before calling us
     const el = cr.el;
     el.style.transition = 'transform 0.12s';
     el.style.transform  = 'scaleY(0.1) scaleX(2.2)';
-    setTimeout(() => { el.remove(); const idx=clones.indexOf(cr); if(idx!==-1) clones.splice(idx,1); }, 180);
-    gs.emo[4] = Math.min(100, gs.emo[4]+30); // FEAR
-    gs.emo[2] = Math.max(0,   gs.emo[2]-15); // HAPPY
+    setTimeout(() => {
+      el.remove();
+      const idx = clones.indexOf(cr); if (idx !== -1) clones.splice(idx, 1);
+    }, 180);
+    gs.emo[4] = Math.min(100, gs.emo[4]+30);
+    gs.emo[2] = Math.max(0,   gs.emo[2]-15);
     clampEmoLocal();
     showBubble('😱');
     setLog('一个个体被压扁了！');
@@ -76,13 +85,20 @@ export function spawnIndividual() {
   cnv.style.cssText = 'display:block;width:64px;height:64px;image-rendering:pixelated;filter:drop-shadow(0 4px 0 rgba(0,0,0,.4));';
   const cCtx = cnv.getContext('2d'); cCtx.imageSmoothingEnabled = false;
   el.appendChild(bub); el.appendChild(cnv); s.appendChild(el);
+  const startX = phys.x + (Math.random()-.5)*40;
+  const startY = phys.y;
   const c = {
     el, bub, bubTO:null, ctx:cCtx,
-    x: phys.x + (Math.random()-.5)*40, y: phys.y,
+    x: startX, y: startY,
     vx: (Math.random()-.5)*120, vy: -100 - Math.random()*80,
     af:0, at:0, age:0, anim:'idle', animLock:false, flipX:false,
     dirty: gs.entityDirty * 0.7, dragging:false, dead:false,
   };
+  // Create Matter body (center of 64x64 element)
+  const body = createCloneBody(startX+32, startY+32, c);
+  window.Matter.Body.setVelocity(body, { x: c.vx/60, y: c.vy/60 });
+  cloneBodyMap.set(c, body);
+
   el.addEventListener('pointerdown', e => beginDrag(e, 'clone', c));
   clones.push(c);
   spawnParticle('✨');
