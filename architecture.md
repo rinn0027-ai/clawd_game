@@ -442,7 +442,7 @@ minutesSinceInteract>30 → 孤独+0.04×(超出分钟数), 孤独>80时信任-0
 ## 十三、绝对不能修改的底层约定
 
 1. **`state.js` 中的数组不能重新赋值**（`clones = []` 是错的，应 `clones.length = 0`）
-2. **Matter.js 通过 `window.Matter` 访问**，不能 import（CDN 全局加载）
+2. **Matter.js 通过 `window.Matter` 访问**，不能 import；脚本路径为本地 `js/lib/matter.min.js`（0.19.0，已下载，不依赖外部 CDN）
 3. **速度换算**：游戏速度 px/s，Matter velocity px/step，换算系数 60（详见 §4.6）
 4. **`gs.stage` 只能由 `checkStage()` 或 `rebirthMain()`/`restartGame()` 修改**，不能在其他地方随意设置
 5. **Matter Body Map 必须同步**：每次 `World.add` 对应一次 Map.set，`World.remove` 对应 Map.delete
@@ -461,3 +461,4 @@ minutesSinceInteract>30 → 孤独+0.04×(超出分钟数), 孤独>80时信任-0
 | 初版 | 基础物理（手动 Euler 积分）、情绪系统、克隆、道具、AI 对话 |
 | Matter.js 集成 | 替换手动积分为 Matter.js 0.19；实体碰撞事件化；道具/克隆/苹果全部纳入物理世界 |
 | 阶段形态变化 | 全程序绘制替代 base64 精灵图；6 个阶段独立形态；CSS scale 驱动大小渐变；`applyStageVisuals()` 统一管理 |
+| 修复阶段形态不生效 | Matter.js 改为本地加载（`js/lib/matter.min.js`）；修复 emotions.js 缺少 `STAGE_NAMES` import；修复老年阶段眼睛高度 `sl?1:1→sl?1:2` |
