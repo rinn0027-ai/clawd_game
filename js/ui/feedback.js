@@ -1,4 +1,4 @@
-import { gs, phys } from '../state.js';
+import { gs, phys, clones } from '../state.js';
 
 export function scn() { return document.getElementById('scene'); }
 
@@ -41,5 +41,18 @@ export function spawnZzz() {
 
 export function tickZzz(dt) {
   gs.zzzTimer -= dt;
-  if (gs.zzzTimer <= 0) { gs.zzzTimer = 1.8 + Math.random()*.8; spawnZzz(); }
+  if (gs.zzzTimer <= 0) {
+    gs.zzzTimer = 1.8 + Math.random()*.8;
+    spawnZzz();
+    clones.forEach(c => {
+      if (!c.dead && Math.random() < 0.65) {
+        const el = document.createElement('div');
+        el.className = 'zzz-p'; el.textContent = 'z';
+        el.style.left = (c.x + 30 + Math.random()*10) + 'px';
+        el.style.top  = (c.y - 5) + 'px';
+        scn().appendChild(el);
+        el.addEventListener('animationend', () => el.remove());
+      }
+    });
+  }
 }

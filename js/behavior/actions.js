@@ -58,7 +58,12 @@ export function doAction(type) {
     gs.isSleeping = true; setAnim('sleep');
     document.getElementById('btn-sleep').querySelector('.bi').textContent = '☀️';
     showBubble('💤'); setLog("Claw'd 进入了甜蜜的梦乡...");
-    gs.emo[E.FEAR] -= 5; clampEmo(); return;
+    gs.emo[E.FEAR] -= 5; clampEmo();
+    clones.forEach((c, i) => {
+      if (c.dead) return;
+      setTimeout(() => showEntityBubble(c, '💤'), 120 + i * 80);
+    });
+    return;
   }
   if (gs.isSleeping) return;
   lockAction(1200);
@@ -71,6 +76,15 @@ export function doAction(type) {
     setAnim('eat'); setTimeout(() => setAnim('idle'), 1600);
     showBubble('😋'); spawnParticle('🍎'); setLog("Claw'd 吃得美滋滋～");
     gs.entityDirty = Math.min(80, gs.entityDirty+3);
+    clones.forEach((c, i) => {
+      if (c.dead) return;
+      setTimeout(() => {
+        setCloneAnim(c, 'eat', 1400);
+        showEntityBubble(c, '😋');
+        spawnParticle('🍎', c.x, c.y);
+        c.dirty = Math.min(80, c.dirty+3);
+      }, 100 + i * 80);
+    });
   } else if (type === 'play') {
     if (gs.energy < 15) { showBubble('😴 太累了'); return; }
     gs.emo[E.HAPPY]  = Math.min(100, gs.emo[E.HAPPY]+20);
@@ -83,6 +97,15 @@ export function doAction(type) {
     showBubble('🎉'); spawnParticle('⭐'); spawnParticle('💫');
     setLog("Claw'd 玩得超开心！");
     gs.entityDirty = Math.min(80, gs.entityDirty+5);
+    clones.forEach((c, i) => {
+      if (c.dead) return;
+      setTimeout(() => {
+        setCloneAnim(c, 'happy', 1800);
+        showEntityBubble(c, '🎉');
+        spawnParticle('⭐', c.x, c.y);
+        c.dirty = Math.min(80, c.dirty+5);
+      }, 100 + i * 80);
+    });
     if (gs.emo[E.HAPPY] > 85 && clones.length < 5 && Math.random() < 0.3) spawnIndividual();
   }
   clampEmo(); updateUI();
