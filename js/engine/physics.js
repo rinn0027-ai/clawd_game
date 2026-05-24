@@ -21,6 +21,57 @@ export function scnH() { return scn().offsetHeight; }
 // Register Matter collision handler
 onCollision((pair) => {
   const { bodyA, bodyB } = pair;
+
+  // Relative speed (px/step → px/s)
+  const relSpd = Math.hypot(
+    bodyA.velocity.x - bodyB.velocity.x,
+    bodyA.velocity.y - bodyB.velocity.y
+  ) * 60;
+
+  // ── Hammer smashes Rock ──────────────────────────────────────────────────
+  const hmr = (bodyA.label==='hammer' && bodyB.label==='rock') ? {rk:bodyB}
+            : (bodyB.label==='hammer' && bodyA.label==='rock') ? {rk:bodyA}
+            : null;
+  if (hmr && relSpd > 50) {
+    const rRef = hmr.rk.gameRef;
+    if (rRef && !rRef._breaking) {
+      rRef._breaking = true;
+      spawnParticle('💥', rRef.x+8,  rRef.y);
+      spawnParticle('🪨', rRef.x,    rRef.y+5);
+      spawnParticle('🪨', rRef.x+16, rRef.y+5);
+      rRef.el.remove();
+      removeBody(hmr.rk); itemBodyMap.delete(rRef);
+      const idx = items.indexOf(rRef); if (idx !== -1) items.splice(idx, 1);
+      setLog('锤子砸碎了石头！💥');
+    }
+  }
+
+  // ── Bucket pours water on impact ─────────────────────────────────────────
+  const bkt = bodyA.label==='bucket' ? bodyA : bodyB.label==='bucket' ? bodyB : null;
+  if (bkt && relSpd > 50) {
+    const bRef = bkt.gameRef;
+    if (bRef && !bRef._pouring) {
+      bRef._pouring = true;
+      setTimeout(() => { if (bRef) bRef._pouring = false; }, 700);
+      for (let i=0; i<6; i++) spawnParticle('💧', bRef.x + Math.random()*24, bRef.y + Math.random()*10);
+      const bx = bRef.x + bRef.size/2, by = bRef.y + bRef.size/2;
+      const R = 90;
+      let washed = false;
+      if (!gs.isDead && Math.hypot(bx-(phys.x+32), by-(phys.y+32)) < R && gs.entityDirty > 0) {
+        gs.entityDirty = Math.max(0, gs.entityDirty - 40);
+        showBubble('💧 淋湿了！'); washed = true;
+      }
+      clones.forEach(c => {
+        if (!c.dead && Math.hypot(bx-(c.x+32), by-(c.y+32)) < R && c.dirty > 0) {
+          c.dirty = Math.max(0, c.dirty - 40);
+          showEntityBubble(c, '💧'); washed = true;
+        }
+      });
+      setLog(washed ? '水桶倒水，洗干净了！💧' : '水桶倒水了，溅了一地！💧');
+    }
+  }
+
+  // ── Item + Entity collisions ─────────────────────────────────────────────
   const ITEMS = new Set(['ball','hammer','rock','bucket','soap']);
   const isItem   = b => ITEMS.has(b.label);
   const isEntity = b => b.label === 'main' || b.label === 'clone';
@@ -29,10 +80,6 @@ onCollision((pair) => {
   if (isItem(bodyA) && isEntity(bodyB))      { iBody = bodyA; eBody = bodyB; }
   else if (isItem(bodyB) && isEntity(bodyA)) { iBody = bodyB; eBody = bodyA; }
   if (!iBody) return;
-
-  const dvx = iBody.velocity.x - eBody.velocity.x;
-  const dvy = iBody.velocity.y - eBody.velocity.y;
-  const relSpd = Math.hypot(dvx, dvy) * 60; // pixels/step → px/s
 
   const cr = eBody.label === 'clone' ? eBody.gameRef : null;
   const ex = cr ? cr.x : phys.x;
@@ -48,7 +95,6 @@ onCollision((pair) => {
       gs.emo[5] = Math.min(100, gs.emo[5]+5);
       gs.emo[2] = Math.min(100, gs.emo[2]+3);
     }
-    // Extra upward pop for drama
     MBody().applyForce(eBody, eBody.position, { x: 0, y: -0.05 });
     showBubble('💥 BONK!'); spawnParticle('⚡'); setLog("Claw'd 被锤子打飞了！哈哈哈"); clampEmo();
   } else if (iBody.label === 'ball' && relSpd > 30) {
