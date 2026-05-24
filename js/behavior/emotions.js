@@ -1,4 +1,4 @@
-import { gs, E, DRIFT, STAGE_DAYS } from '../state.js';
+import { gs, E, DRIFT, STAGE_DAYS, STAGE_NAMES } from '../state.js';
 import { setAnim } from '../engine/renderer.js';
 import { clampEmo } from './actions.js';
 

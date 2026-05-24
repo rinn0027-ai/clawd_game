@@ -156,7 +156,7 @@ function _drawElder(ctx, anim, frame) {
   ctx.fillRect(4, 10+y, 3, 3);    // left leg
   ctx.fillRect(9, 10+y, 3, 3);    // right leg
   // Squinting eyes (height 1 instead of 2)
-  _eyes(ctx, 5, 9, 3+y, 2, sl ? 1 : 1, sl, sd);
+  _eyes(ctx, 5, 9, 3+y, 2, sl ? 1 : 2, sl, sd);
   // Wrinkle dots
   ctx.fillStyle = '#7a3a1e';
   ctx.fillRect(7, 5+y, 1, 1);     // forehead dot
