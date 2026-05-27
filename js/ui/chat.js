@@ -11,8 +11,11 @@ export function toggleChat() {
   }
 }
 
+const PROVIDERS = ['anthropic', 'gemini', 'openai'];
+
 export function toggleProvider() {
-  gs.apiProvider = gs.apiProvider === 'anthropic' ? 'gemini' : 'anthropic';
+  const idx = PROVIDERS.indexOf(gs.apiProvider);
+  gs.apiProvider = PROVIDERS[(idx + 1) % PROVIDERS.length];
   localStorage.setItem('clawd_provider', gs.apiProvider);
   updateProviderUI();
 }
@@ -22,15 +25,23 @@ export function updateProviderUI() {
   const inp = document.getElementById('api-input');
   const pr  = document.getElementById('proxy-row');
   const pi  = document.getElementById('proxy-input');
+  btn.className = gs.apiProvider !== 'anthropic' ? gs.apiProvider : '';
   if (gs.apiProvider === 'gemini') {
-    btn.textContent = 'Gemini'; btn.classList.add('gemini');
+    btn.textContent = 'Gemini';
     inp.placeholder = gs.geminiKey ? 'Gemini Key 已保存 ✓' : 'Google Gemini API Key';
     pr.style.display = 'flex';
     pi.placeholder = gs.geminiProxy
       ? `代理: ${gs.geminiProxy.slice(0,28)}...`
       : '代理地址（选填）如: https://你的代理.com';
+  } else if (gs.apiProvider === 'openai') {
+    btn.textContent = 'OpenAI';
+    inp.placeholder = gs.openaiKey ? 'OpenAI Key 已保存 ✓' : 'OpenAI API Key (sk-...)';
+    pr.style.display = 'flex';
+    pi.placeholder = gs.openaiProxy
+      ? `端点: ${gs.openaiProxy.slice(0,28)}...`
+      : '自定义端点（选填）如: https://你的代理.com/v1';
   } else {
-    btn.textContent = 'Anthropic'; btn.classList.remove('gemini');
+    btn.textContent = 'Claude';
     inp.placeholder = gs.apiKey ? 'API Key 已保存 ✓' : 'Anthropic API Key';
     pr.style.display = 'none';
   }
@@ -38,9 +49,15 @@ export function updateProviderUI() {
 
 export function saveProxy() {
   const v = document.getElementById('proxy-input').value.trim();
-  gs.geminiProxy = v;
-  if (v) localStorage.setItem('clawd_geminiproxy', v);
-  else   localStorage.removeItem('clawd_geminiproxy');
+  if (gs.apiProvider === 'openai') {
+    gs.openaiProxy = v;
+    if (v) localStorage.setItem('clawd_openaiproxy', v);
+    else   localStorage.removeItem('clawd_openaiproxy');
+  } else {
+    gs.geminiProxy = v;
+    if (v) localStorage.setItem('clawd_geminiproxy', v);
+    else   localStorage.removeItem('clawd_geminiproxy');
+  }
   document.getElementById('proxy-input').value = '';
   updateProviderUI();
 }
@@ -48,8 +65,9 @@ export function saveProxy() {
 export function saveKey() {
   const k = document.getElementById('api-input').value.trim();
   if (!k) return;
-  if (gs.apiProvider === 'gemini') { gs.geminiKey = k; localStorage.setItem('clawd_geminikey', k); }
-  else                              { gs.apiKey    = k; localStorage.setItem('clawd_apikey', k); }
+  if (gs.apiProvider === 'gemini')      { gs.geminiKey = k; localStorage.setItem('clawd_geminikey', k); }
+  else if (gs.apiProvider === 'openai') { gs.openaiKey = k; localStorage.setItem('clawd_openaikey', k); }
+  else                                   { gs.apiKey    = k; localStorage.setItem('clawd_apikey', k); }
   document.getElementById('api-input').value = '';
   updateProviderUI();
 }
@@ -63,9 +81,12 @@ export async function sendChat() {
   gs.emo[E.CURIO]  = Math.min(100, gs.emo[E.CURIO]+8);
   gs.emo[E.TRUST]  = Math.min(100, gs.emo[E.TRUST]+0.5);
   gs.emo[E.ATTACH] = Math.min(100, gs.emo[E.ATTACH]+0.3);
-  const ak = gs.apiProvider === 'gemini' ? gs.geminiKey : gs.apiKey;
+  const ak = gs.apiProvider === 'gemini' ? gs.geminiKey
+           : gs.apiProvider === 'openai' ? gs.openaiKey
+           : gs.apiKey;
   if (!ak) {
-    appendChat('clawd', `（你还没有配置 ${gs.apiProvider==='gemini'?'Gemini':'Anthropic'} API Key，我没办法回话...）`);
+    const name = gs.apiProvider === 'gemini' ? 'Gemini' : gs.apiProvider === 'openai' ? 'OpenAI' : 'Anthropic';
+    appendChat('clawd', `（你还没有配置 ${name} API Key，我没办法回话...）`);
     return;
   }
   gs.chatHistory.push({role:'user', content:text});
@@ -83,6 +104,17 @@ export async function sendChat() {
       const data = await resp.json();
       if (!resp.ok) throw new Error(data?.error?.message || `HTTP ${resp.status}`);
       reply = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '（沉默）';
+    } else if (gs.apiProvider === 'openai') {
+      const ep = (gs.openaiProxy || 'https://api.openai.com/v1') + '/chat/completions';
+      const resp = await fetch(ep, {
+        method:'POST',
+        headers:{'Content-Type':'application/json', 'Authorization':`Bearer ${ak}`},
+        body:JSON.stringify({model:'gpt-4o-mini', max_tokens:300,
+          messages:[{role:'system', content:buildSystemPrompt()}, ...gs.chatHistory]})
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data?.error?.message || `HTTP ${resp.status}`);
+      reply = data?.choices?.[0]?.message?.content?.trim() || '（沉默）';
     } else {
       const resp = await fetch('https://api.anthropic.com/v1/messages', {
         method:'POST',

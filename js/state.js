@@ -38,6 +38,8 @@ export const gs = {
   apiKey: localStorage.getItem('clawd_apikey') || '',
   geminiKey: localStorage.getItem('clawd_geminikey') || '',
   geminiProxy: localStorage.getItem('clawd_geminiproxy') || '',
+  openaiKey: localStorage.getItem('clawd_openaikey') || '',
+  openaiProxy: localStorage.getItem('clawd_openaiproxy') || '',
   apiProvider: localStorage.getItem('clawd_provider') || 'anthropic',
   chatHistory: [],
   // renderer
