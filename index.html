@@ -115,6 +115,7 @@ html,body{width:100%;height:100%;background:var(--bg);display:flex;align-items:c
 #provider-btn{background:#1a1a2e;border:1px solid var(--accent);color:var(--accent);
   font-family:'Press Start 2P',monospace;font-size:5px;padding:5px 5px;cursor:pointer;white-space:nowrap;flex-shrink:0}
 #provider-btn.gemini{border-color:#4a8fff;color:#4a8fff}
+#provider-btn.openai{border-color:#10a37f;color:#10a37f}
 #api-input{flex:1;background:#0d0d1e;border:1px solid var(--border2);color:var(--dim);
   font-family:'Press Start 2P',monospace;font-size:6px;padding:5px 6px;min-width:0}
 #input-row{padding:6px 8px 8px;border-top:1px solid var(--border);display:flex;gap:4px;flex-shrink:0}
@@ -260,6 +261,8 @@ let wanderTimer=0;
 let apiKey=localStorage.getItem('clawd_apikey')||'';
 let geminiKey=localStorage.getItem('clawd_geminikey')||'';
 let geminiProxy=localStorage.getItem('clawd_geminiproxy')||'';
+let openaiKey=localStorage.getItem('clawd_openaikey')||'';
+let openaiProxy=localStorage.getItem('clawd_openaiproxy')||'';
 let apiProvider=localStorage.getItem('clawd_provider')||'anthropic';
 let chatHistory=[];
 const STAGE_NAMES=['蛋','婴儿','幼儿','少年','成年','老年'];
@@ -921,22 +924,24 @@ function toggleChat(){
   const p=document.getElementById('chat-panel');p.classList.toggle('open');
   if(p.classList.contains('open')){document.getElementById('chat-input').focus();if(chatHistory.length===0)appendChat('clawd','（终于等到你来说话了...）');}
 }
-function toggleProvider(){apiProvider=apiProvider==='anthropic'?'gemini':'anthropic';localStorage.setItem('clawd_provider',apiProvider);updateProviderUI();}
+function toggleProvider(){const order=['anthropic','gemini','openai'];const idx=order.indexOf(apiProvider);apiProvider=order[(idx+1)%order.length];localStorage.setItem('clawd_provider',apiProvider);updateProviderUI();}
 function updateProviderUI(){
   const btn=document.getElementById('provider-btn'),inp=document.getElementById('api-input');
   const pr=document.getElementById('proxy-row'),pi=document.getElementById('proxy-input');
+  btn.className='';
   if(apiProvider==='gemini'){btn.textContent='Gemini';btn.classList.add('gemini');inp.placeholder=geminiKey?'Gemini Key 已保存 ✓':'Google Gemini API Key';pr.style.display='flex';pi.placeholder=geminiProxy?`代理: ${geminiProxy.slice(0,28)}...`:'代理地址（选填）如: https://你的代理.com';}
-  else{btn.textContent='Anthropic';btn.classList.remove('gemini');inp.placeholder=apiKey?'API Key 已保存 ✓':'Anthropic API Key';pr.style.display='none';}
+  else if(apiProvider==='openai'){btn.textContent='OpenAI';btn.classList.add('openai');inp.placeholder=openaiKey?'OpenAI Key 已保存 ✓':'OpenAI API Key';pr.style.display='flex';pi.placeholder=openaiProxy?`代理: ${openaiProxy.slice(0,28)}...`:'代理地址（选填）如: https://你的代理.com';}
+  else{btn.textContent='Anthropic';inp.placeholder=apiKey?'API Key 已保存 ✓':'Anthropic API Key';pr.style.display='none';}
 }
-function saveProxy(){const v=document.getElementById('proxy-input').value.trim();geminiProxy=v;if(v)localStorage.setItem('clawd_geminiproxy',v);else localStorage.removeItem('clawd_geminiproxy');document.getElementById('proxy-input').value='';updateProviderUI();}
-function saveKey(){const k=document.getElementById('api-input').value.trim();if(!k)return;if(apiProvider==='gemini'){geminiKey=k;localStorage.setItem('clawd_geminikey',k);}else{apiKey=k;localStorage.setItem('clawd_apikey',k);}document.getElementById('api-input').value='';updateProviderUI();}
+function saveProxy(){const v=document.getElementById('proxy-input').value.trim();if(apiProvider==='openai'){openaiProxy=v;if(v)localStorage.setItem('clawd_openaiproxy',v);else localStorage.removeItem('clawd_openaiproxy');}else{geminiProxy=v;if(v)localStorage.setItem('clawd_geminiproxy',v);else localStorage.removeItem('clawd_geminiproxy');}document.getElementById('proxy-input').value='';updateProviderUI();}
+function saveKey(){const k=document.getElementById('api-input').value.trim();if(!k)return;if(apiProvider==='gemini'){geminiKey=k;localStorage.setItem('clawd_geminikey',k);}else if(apiProvider==='openai'){openaiKey=k;localStorage.setItem('clawd_openaikey',k);}else{apiKey=k;localStorage.setItem('clawd_apikey',k);}document.getElementById('api-input').value='';updateProviderUI();}
 document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat();});
 async function sendChat(){
   const input=document.getElementById('chat-input');const text=input.value.trim();if(!text)return;
   input.value='';appendChat('player',text);
   minutesSinceInteract=0;emo[E.LONE]=Math.max(0,emo[E.LONE]-20);emo[E.CURIO]=Math.min(100,emo[E.CURIO]+8);emo[E.TRUST]=Math.min(100,emo[E.TRUST]+0.5);emo[E.ATTACH]=Math.min(100,emo[E.ATTACH]+0.3);
-  const ak=apiProvider==='gemini'?geminiKey:apiKey;
-  if(!ak){appendChat('clawd',`（你还没有配置 ${apiProvider==='gemini'?'Gemini':'Anthropic'} API Key，我没办法回话...）`);return;}
+  const ak=apiProvider==='gemini'?geminiKey:apiProvider==='openai'?openaiKey:apiKey;
+  if(!ak){appendChat('clawd',`（你还没有配置 ${apiProvider==='gemini'?'Gemini':apiProvider==='openai'?'OpenAI':'Anthropic'} API Key，我没办法回话...）`);return;}
   chatHistory.push({role:'user',content:text});
   if(chatHistory.length>12)chatHistory=chatHistory.slice(-12);
   appendChat('clawd','...');
@@ -948,6 +953,12 @@ async function sendChat(){
       const resp=await fetch(`${ep}?key=${ak}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system_instruction:{parts:[{text:buildSystemPrompt()}]},contents:gh,generationConfig:{maxOutputTokens:300}})});
       const data=await resp.json();if(!resp.ok)throw new Error(data?.error?.message||`HTTP ${resp.status}`);
       reply=data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()||'（沉默）';
+    }else if(apiProvider==='openai'){
+      const ep=(openaiProxy||'https://api.openai.com/v1')+'/chat/completions';
+      const msgs=[{role:'system',content:buildSystemPrompt()},...chatHistory];
+      const resp=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${ak}`},body:JSON.stringify({model:'gpt-4o-mini',max_tokens:300,messages:msgs})});
+      const data=await resp.json();if(!resp.ok)throw new Error(data?.error?.message||`HTTP ${resp.status}`);
+      reply=data?.choices?.[0]?.message?.content?.trim()||'（沉默）';
     }else{
       const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:buildSystemPrompt(),messages:chatHistory})});
       const data=await resp.json();if(!resp.ok)throw new Error(data?.error?.message||`HTTP ${resp.status}`);
